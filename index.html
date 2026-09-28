@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Generador de Constancias de Pago - C.C. Trivani</title>
+    
+    <!-- FAVICON MODERNO Y LLAMATIVO EN LA PESTAÑA DEL NAVEGADOR -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%230f172a'/><path d='M25 75V35L50 20L75 35V75H60V50H40V75H25Z' fill='%23f59e0b'/><circle cx='50' cy='38' r='6' fill='%23ffffff'/></svg>">
+
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome Icons -->
@@ -67,7 +71,7 @@
         <header class="no-print bg-slate-900 text-white shadow-md sticky top-0 z-50">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
                 <div class="flex items-center space-x-3">
-                    <div class="bg-amber-500 text-slate-900 p-2 rounded-lg font-bold">
+                    <div class="bg-amber-500 text-slate-900 p-2 rounded-lg font-bold shadow-lg shadow-amber-500/20">
                         <i class="fa-solid fa-building text-lg"></i>
                     </div>
                     <div>
@@ -103,6 +107,17 @@
 
                     <form id="receiptForm" onsubmit="event.preventDefault();" class="space-y-4 text-xs sm:text-sm">
                         
+                        <!-- Cargar Logo Personalizado -->
+                        <div class="p-3.5 bg-amber-50/60 rounded-lg border border-amber-200/80 space-y-2">
+                            <h3 class="font-semibold text-amber-900 text-xs uppercase tracking-wider flex items-center gap-1.5">
+                                <i class="fa-solid fa-image text-amber-600"></i> Personalización de Logo
+                            </h3>
+                            <div>
+                                <label class="block text-slate-600 font-medium mb-1">Cargar Logo del Recibo</label>
+                                <input type="file" id="in_logo" accept="image/*" onchange="uploadLogo(event)" class="w-full text-xs text-slate-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-amber-500 file:text-slate-950 hover:file:bg-amber-400 cursor-pointer">
+                            </div>
+                        </div>
+
                         <!-- Datos Inquilino -->
                         <div class="p-3.5 bg-slate-50/80 rounded-lg border border-slate-200/60 space-y-3">
                             <h3 class="font-semibold text-slate-700 text-xs uppercase tracking-wider flex items-center gap-1.5">
@@ -196,12 +211,18 @@
                     <!-- Encabezado del Recibo -->
                     <div>
                         <div class="border-b-2 border-slate-900 pb-5 mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                            <div>
-                                <div class="inline-block bg-slate-900 text-amber-400 text-xs font-bold uppercase tracking-widest px-2.5 py-1 rounded mb-2">
-                                    Documento de Pago
+                            <div class="flex items-center gap-4">
+                                <!-- LOGO EN EL RECIBO -->
+                                <div id="logoContainer" class="w-16 h-16 rounded-xl bg-slate-900 text-amber-400 flex items-center justify-center font-black text-2xl shadow-md border-2 border-amber-500 overflow-hidden flex-shrink-0">
+                                    <img id="imgLogo" src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%230f172a'/><path d='M25 75V35L50 20L75 35V75H60V50H40V75H25Z' fill='%23f59e0b'/><circle cx='50' cy='38' r='6' fill='%23ffffff'/></svg>" alt="Logo" class="w-full h-full object-cover">
                                 </div>
-                                <h2 class="text-xl sm:text-2xl font-black text-slate-900 tracking-tight uppercase">Constancia de Pago de Alquiler</h2>
-                                <p class="text-slate-600 font-medium text-sm">Centro Comercial Trivani</p>
+                                <div>
+                                    <div class="inline-block bg-slate-900 text-amber-400 text-xs font-bold uppercase tracking-widest px-2.5 py-1 rounded mb-1">
+                                        Documento de Pago
+                                    </div>
+                                    <h2 class="text-xl sm:text-2xl font-black text-slate-900 tracking-tight uppercase">Constancia de Pago de Alquiler</h2>
+                                    <p class="text-slate-600 font-medium text-sm">Centro Comercial Trivani</p>
+                                </div>
                             </div>
                             <div class="sm:text-right bg-slate-50 p-3 rounded-lg border border-slate-200 w-full sm:w-auto">
                                 <div class="text-xs text-slate-500 font-semibold uppercase">Comprobante N°</div>
@@ -310,6 +331,17 @@
 
     <!-- JAVASCRIPT LOGIC -->
     <script>
+        function uploadLogo(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('imgLogo').src = e.target.result;
+                }
+                reader.readAsDataURL(file);
+            }
+        }
+
         // Convierte números a letras en Español para montos en Soles
         function numeroALetras(num) {
             const unidades = ['', 'Un', 'Dos', 'Tres', 'Cuatro', 'Cinco', 'Seis', 'Siete', 'Ocho', 'Nueve'];
@@ -317,7 +349,7 @@
             const especiales = {
                 11: 'Once', 12: 'Doce', 13: 'Trece', 14: 'Catorce', 15: 'Quince',
                 16: 'Dieciséis', 17: 'Diecisiete', 18: 'Dieciocho', 19: 'Diecinueve',
-                21: 'Veintiuno', 22: 'Veintidós', 23: 'Veintitrés', 24: 'Veinticuatro', 25: 'Veinticinco',
+                21: 'Veintiuno', 22: 'Veintidós', 23: 'Veintitrés', 24: 'Veinticinco',
                 26: 'Veintiséis', 27: 'Veintisiete', 28: 'Veintiocho', 29: 'Veintinueve'
             };
             const centenas = ['', 'Ciento', 'Doscientos', 'Trescientos', 'Cuatrocientos', 'Quinientos', 'Seiscientos', 'Setecientos', 'Ochocientos', 'Novecientos'];
@@ -434,6 +466,7 @@
             document.getElementById('in_ubicacion').value = "Centro Comercial Trivani";
             document.getElementById('in_cuenta').value = "Banco de la Nación (Cta. 04-227-354750)";
             document.getElementById('in_fecha').value = "26 de Septiembre de 2026";
+            document.getElementById('imgLogo').src = "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%230f172a'/><path d='M25 75V35L50 20L75 35V75H60V50H40V75H25Z' fill='%23f59e0b'/><circle cx='50' cy='38' r='6' fill='%23ffffff'/></svg>";
             updatePreview();
         }
 

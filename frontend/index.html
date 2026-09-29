@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Generador de Constancias de Pago - C.C. Trivani</title>
+    <title>Sistema de Constancias - C.C. Trivani</title>
     
     <!-- FAVICON -->
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%230f172a'/><path d='M25 75V35L50 20L75 35V75H60V50H40V75H25Z' fill='%23f59e0b'/><circle cx='50' cy='38' r='6' fill='%23ffffff'/></svg>">
@@ -23,12 +23,6 @@
                 extend: {
                     fontFamily: {
                         sans: ['Inter', 'sans-serif'],
-                    },
-                    colors: {
-                        navy: {
-                            800: '#0f172a',
-                            900: '#020617',
-                        }
                     }
                 }
             }
@@ -73,9 +67,46 @@
         }
     </style>
 </head>
-<body class="h-full text-slate-800 antialiased font-sans">
-    
-    <div class="min-h-screen flex flex-col">
+<body class="h-full text-slate-800 antialiased font-sans bg-slate-900">
+
+    <!-- 1. PANTALLA DE LOGIN (SE MUESTRA AL INICIO) -->
+    <div id="loginSection" class="min-h-screen flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md border border-slate-200 text-slate-900">
+            <div class="text-center mb-6">
+                <div class="w-16 h-16 bg-slate-900 text-amber-500 rounded-2xl flex items-center justify-center mx-auto mb-3 text-2xl font-bold shadow-lg border-2 border-amber-500">
+                    <i class="fa-solid fa-building"></i>
+                </div>
+                <h2 class="text-2xl font-black tracking-tight">C.C. TRIVANI</h2>
+                <p class="text-xs text-slate-500">Sistema de Gestión de Constancias</p>
+            </div>
+
+            <form onsubmit="handleLogin(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Usuario</label>
+                    <input type="text" id="login_user" placeholder="Ej: admin o inquilino" class="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none text-sm" required>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Contraseña</label>
+                    <input type="password" id="login_pass" placeholder="••••••••" class="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none text-sm" required>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Tipo de Usuario (Rol)</label>
+                    <select id="login_role" class="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none text-sm bg-white font-medium">
+                        <option value="ADMIN">Administrador (Control Total)</option>
+                        <option value="INQUILINO">Inquilino (Ver / Descargar)</option>
+                    </select>
+                </div>
+                <button type="submit" class="w-full py-3 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-lg shadow-md transition text-sm">
+                    Ingresar al Sistema
+                </button>
+            </form>
+            <p class="text-[11px] text-slate-400 text-center mt-4">Demo: puedes colocar cualquier usuario para ingresar.</p>
+        </div>
+    </div>
+
+    <!-- 2. PANEL PRINCIPAL (SISTEMA DE CONSTANCIAS) -->
+    <div id="mainDashboard" class="hidden min-h-screen flex flex-col bg-slate-100 text-slate-800">
+        
         <!-- Top Bar (No Impresión) -->
         <header class="no-print bg-slate-900 text-white shadow-md sticky top-0 z-50">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
@@ -85,11 +116,11 @@
                     </div>
                     <div>
                         <h1 class="font-bold text-lg leading-tight">Centro Comercial Trivani</h1>
-                        <p class="text-xs text-slate-400">Generador & Historial de Constancias</p>
+                        <p class="text-xs text-slate-400" id="userRoleBadge">Sesión Iniciada</p>
                     </div>
                 </div>
                 <div class="flex items-center space-x-2">
-                    <button onclick="resetDefaults()" class="px-3 py-1.5 text-xs sm:text-sm bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg transition duration-200 border border-slate-700 flex items-center space-x-1">
+                    <button id="btnReset" onclick="resetDefaults()" class="px-3 py-1.5 text-xs sm:text-sm bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg transition duration-200 border border-slate-700 flex items-center space-x-1">
                         <i class="fa-solid fa-rotate-left"></i>
                         <span class="hidden sm:inline">Restablecer</span>
                     </button>
@@ -98,16 +129,21 @@
                         <i class="fa-solid fa-print"></i>
                         <span>Imprimir</span>
                     </button>
-                    <!-- BOTÓN DE DESCARGAR PDF / HISTORIAL -->
+                    <!-- BOTÓN DE DESCARGAR PDF -->
                     <button onclick="generateAndSavePDF()" class="px-4 py-1.5 text-xs sm:text-sm bg-amber-500 hover:bg-amber-400 text-slate-950 font-semibold rounded-lg shadow-sm transition duration-200 flex items-center space-x-2">
                         <i class="fa-solid fa-file-pdf"></i>
                         <span>Descargar PDF</span>
+                    </button>
+                    <!-- BOTÓN CERRAR SESIÓN -->
+                    <button onclick="logout()" class="px-3 py-1.5 text-xs sm:text-sm bg-red-900/40 hover:bg-red-600 text-red-200 hover:text-white font-medium rounded-lg transition border border-red-800/50 flex items-center space-x-1">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                        <span class="hidden sm:inline">Salir</span>
                     </button>
                 </div>
             </div>
         </header>
 
-        <!-- PANEL FLOTANTE DE ENLACE Y ARCHIVO COMPARTIDO -->
+        <!-- PANEL FLOTANTE DE RESUMEN COMPARTIDO -->
         <div id="shareBanner" class="no-print hidden bg-slate-800 text-white border-b border-amber-500/30 p-4 transition-all">
             <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
                 <div class="flex items-center space-x-3">
@@ -116,14 +152,10 @@
                     </div>
                     <div>
                         <h4 class="font-bold text-sm">¡Comprobante procesado e guardado en el historial!</h4>
-                        <p class="text-xs text-slate-300">Puedes compartir directamente el archivo PDF o enviar el resumen detallado.</p>
+                        <p class="text-xs text-slate-300">Puedes copiar el resumen detallado para enviarlo.</p>
                     </div>
                 </div>
                 <div class="flex items-center space-x-2 w-full sm:w-auto">
-                    <button onclick="sharePDFFile()" class="flex-1 sm:flex-none px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold rounded-lg flex items-center justify-center space-x-2 transition">
-                        <i class="fa-brands fa-whatsapp text-lg"></i>
-                        <span>Compartir PDF</span>
-                    </button>
                     <button onclick="copyShareText()" class="flex-1 sm:flex-none px-4 py-2 bg-slate-700 hover:bg-slate-600 text-slate-200 text-xs font-semibold rounded-lg flex items-center justify-center space-x-2 transition border border-slate-600">
                         <i class="fa-regular fa-copy"></i>
                         <span id="copyBtnText">Copiar Resumen</span>
@@ -137,8 +169,8 @@
 
         <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
             
-            <!-- FORMULARIO DE EDICIÓN E HISTORIAL (Columna Izquierda) -->
-            <section class="no-print lg:col-span-5 space-y-6">
+            <!-- FORMULARIO DE EDICIÓN E HISTORIAL (SOLO VISIBLE PARA ADMIN) -->
+            <section id="adminPanel" class="no-print lg:col-span-5 space-y-6">
                 
                 <!-- EDICIÓN DE RECIBO -->
                 <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5 sm:p-6">
@@ -170,11 +202,16 @@
                             </h3>
                             <div>
                                 <label class="block text-slate-600 font-medium mb-1">Nombre Completo</label>
-                                <input type="text" id="in_inquilino" value="ANA QUISPE QUISPE" oninput="updatePreview()" class="w-full px-3 py-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition">
+                                <input type="text" id="in_inquilino" value="JUAN ELIAS QUISPE SURCO" oninput="updatePreview()" class="w-full px-3 py-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition">
                             </div>
                             <div>
-                                <label class="block text-slate-600 font-medium mb-1">DNI Depositante</label>
-                                <input type="text" id="in_dni_inquilino" value="23940657" oninput="updatePreview()" class="w-full px-3 py-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition">
+                                <div class="flex justify-between items-center mb-1">
+                                    <label class="block text-slate-600 font-medium">DNI Depositante</label>
+                                    <button type="button" onclick="openDNIBusqueda()" class="text-[11px] text-amber-600 hover:text-amber-800 font-medium flex items-center gap-1">
+                                        <i class="fa-solid fa-magnifying-glass"></i> Buscar DNI
+                                    </button>
+                                </div>
+                                <input type="text" id="in_dni_inquilino" value="60241705" oninput="updatePreview()" class="w-full px-3 py-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition">
                             </div>
                         </div>
 
@@ -188,12 +225,12 @@
                                     <label class="block text-slate-600 font-medium mb-1">Monto (S/)</label>
                                     <div class="relative">
                                         <span class="absolute left-3 top-2 text-slate-400 font-semibold">S/</span>
-                                        <input type="number" step="0.01" id="in_monto" value="500.00" oninput="handleAmountChange()" class="w-full pl-8 pr-3 py-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition font-semibold text-slate-900">
+                                        <input type="number" step="0.01" id="in_monto" value="630.00" oninput="handleAmountChange()" class="w-full pl-8 pr-3 py-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition font-semibold text-slate-900">
                                     </div>
                                 </div>
                                 <div>
                                     <label class="block text-slate-600 font-medium mb-1">Periodo / Mes</label>
-                                    <input type="text" id="in_periodo" value="" oninput="updatePreview()" class="w-full px-3 py-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition">
+                                    <input type="text" id="in_periodo" value="Septiembre 2026" oninput="updatePreview()" class="w-full px-3 py-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition">
                                 </div>
                             </div>
                             <div>
@@ -201,7 +238,7 @@
                                     <label class="block text-slate-600 font-medium">Monto en Letras</label>
                                     <button type="button" onclick="autoConvertLetters()" class="text-[11px] text-amber-700 hover:text-amber-900 font-medium underline">Autogenerar</button>
                                 </div>
-                                <input type="text" id="in_monto_letras" value="Quinientos y 00/100 Soles" oninput="updatePreview()" class="w-full px-3 py-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition italic text-slate-700">
+                                <input type="text" id="in_monto_letras" value="Seiscientos Treinta y 00/100 Soles" oninput="updatePreview()" class="w-full px-3 py-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition italic text-slate-700">
                             </div>
                         </div>
 
@@ -212,10 +249,10 @@
                             </h3>
                             <div>
                                 <div class="flex justify-between items-center mb-1">
-                                    <label class="block text-slate-600 font-medium">Fecha y Hora de Operación</label>
+                                    <label class="block text-slate-600 font-medium">Fecha de Operación</label>
                                     <button type="button" onclick="setCurrentDateTime()" class="text-[11px] text-amber-600 hover:underline">Usar Ahora</button>
                                 </div>
-                                <input type="text" id="in_fecha" value="" oninput="updatePreview()" class="w-full px-3 py-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition">
+                                <input type="text" id="in_fecha" value="28 de Septiembre de 2026" oninput="updatePreview()" class="w-full px-3 py-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition">
                             </div>
                             <div>
                                 <label class="block text-slate-600 font-medium mb-1">Concepto</label>
@@ -239,7 +276,7 @@
                             <div class="grid grid-cols-2 gap-3">
                                 <div>
                                     <label class="block text-slate-600 font-medium mb-1">Nombre Arrendador</label>
-                                    <input type="text" id="in_arrendador" value="VÍCTOR ALMIRÓN PINCHI" oninput="updatePreview()" class="w-full px-3 py-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition">
+                                    <input type="text" id="in_arrendador" value="VICTOR ALMIRÓN PINCHI" oninput="updatePreview()" class="w-full px-3 py-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition">
                                 </div>
                                 <div>
                                     <label class="block text-slate-600 font-medium mb-1">DNI Arrendador</label>
@@ -251,7 +288,7 @@
                     </form>
                 </div>
 
-                <!-- SECCIÓN APARTADO HISTORIAL DE PAGOS -->
+                <!-- SECCIÓN HISTORIAL DE PAGOS -->
                 <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5 sm:p-6">
                     <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
                         <h3 class="font-bold text-slate-900 text-sm flex items-center gap-2">
@@ -264,15 +301,14 @@
                     </div>
 
                     <div id="historyList" class="space-y-2 max-h-64 overflow-y-auto pr-1">
-                        <!-- Se inserta dinámicamente mediante JS -->
                         <p class="text-xs text-slate-400 italic text-center py-4">No hay pagos registrados aún en el historial.</p>
                     </div>
                 </div>
 
             </section>
 
-            <!-- VISTA PREVIA DEL DOCUMENTO (Columna Derecha - Imprimible) -->
-            <section class="lg:col-span-7 flex justify-center items-start print-area">
+            <!-- VISTA PREVIA DEL DOCUMENTO (Ajusta dinámicamente según Rol) -->
+            <section id="docSection" class="lg:col-span-7 flex justify-center items-start print-area">
                 <div id="receiptToPrint" class="receipt-card bg-white w-full max-w-[720px] rounded-xl border border-slate-200 shadow-xl p-6 sm:p-8 transition-all duration-200 text-slate-900 flex flex-col justify-between">
                     
                     <!-- Encabezado del Recibo -->
@@ -293,24 +329,24 @@
                             </div>
                             <div class="sm:text-right bg-slate-50 p-2.5 rounded-lg border border-slate-200 w-full sm:w-auto">
                                 <div class="text-[11px] text-slate-500 font-semibold uppercase">Comprobante N°</div>
-                                <div class="text-xs font-bold text-slate-900" id="out_comprobante">001-2026-09</div>
-                                <div class="text-[11px] text-slate-500 mt-0.5" id="out_fecha_header">--</div>
+                                <div class="text-xs font-bold text-slate-900" id="out_comprobante">001-SEPTIEMBRE-2026</div>
+                                <div class="text-[11px] text-slate-500 mt-0.5" id="out_fecha_header">28 de Septiembre de 2026</div>
                             </div>
                         </div>
 
                         <!-- Párrafo Legal Breve -->
                         <p class="text-slate-600 text-xs leading-relaxed mb-4">
-                            Por medio del presente documento, se deja constancia formal de la recepción del pago por concepto de alquiler correspondiente al mes de <strong class="text-slate-900" id="out_periodo_desc">--</strong> por el uso comercial de un local dentro del <strong class="text-slate-900" id="out_ubicacion_desc">Centro Comercial Trivani</strong>.
+                            Por medio del presente documento, se deja constancia formal de la recepción del pago por concepto de alquiler correspondiente al mes de <strong class="text-slate-900" id="out_periodo_desc">Septiembre 2026</strong> por el uso comercial de un local dentro del <strong class="text-slate-900" id="out_ubicacion_desc">Centro Comercial Trivani</strong>.
                         </p>
 
                         <!-- Caja de Monto Principal -->
                         <div class="bg-gradient-to-r from-slate-900 to-slate-800 text-white rounded-xl p-4 mb-5 shadow-md">
                             <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-1 mb-1">
                                 <span class="text-[11px] uppercase tracking-wider text-amber-400 font-semibold">Total Recibido</span>
-                                <span class="text-2xl font-black text-amber-400" id="out_monto">S/ 500.00</span>
+                                <span class="text-2xl font-black text-amber-400" id="out_monto">S/ 630.00</span>
                             </div>
                             <div class="pt-1.5 border-t border-slate-700/80 text-xs text-slate-300 font-medium italic">
-                                Son: <span id="out_monto_letras" class="text-white font-normal">Quinientos y 00/100 Soles</span>
+                                Son: <span id="out_monto_letras" class="text-white font-normal">Seiscientos Treinta y 00/100 Soles</span>
                             </div>
                         </div>
 
@@ -322,15 +358,15 @@
                             <div class="grid grid-cols-1 gap-1 text-xs">
                                 <div class="flex justify-between py-1 border-b border-slate-100">
                                     <span class="text-slate-500 font-medium">Inquilino / Depositante:</span>
-                                    <span class="font-bold text-slate-900 uppercase" id="out_inquilino">ANA QUISPE QUISPE</span>
+                                    <span class="font-bold text-slate-900 uppercase" id="out_inquilino">JUAN ELIAS QUISPE SURCO</span>
                                 </div>
                                 <div class="flex justify-between py-1 border-b border-slate-100">
                                     <span class="text-slate-500 font-medium">DNI Depositante:</span>
-                                    <span class="font-semibold text-slate-800" id="out_dni_inquilino">23940657</span>
+                                    <span class="font-semibold text-slate-800" id="out_dni_inquilino">60241705</span>
                                 </div>
                                 <div class="flex justify-between py-1 border-b border-slate-100">
                                     <span class="text-slate-500 font-medium">Arrendador / Beneficiario:</span>
-                                    <span class="font-bold text-slate-900 uppercase" id="out_arrendador">VÍCTOR ALMIRÓN PINCHI</span>
+                                    <span class="font-bold text-slate-900 uppercase" id="out_arrendador">VICTOR ALMIRÓN PINCHI</span>
                                 </div>
                                 <div class="flex justify-between py-1 border-b border-slate-100">
                                     <span class="text-slate-500 font-medium">DNI Arrendador:</span>
@@ -351,7 +387,7 @@
                                 </div>
                                 <div class="flex justify-between py-1 border-b border-slate-100">
                                     <span class="text-slate-500 font-medium">Periodo / Mes:</span>
-                                    <span class="font-semibold text-slate-800" id="out_periodo">--</span>
+                                    <span class="font-semibold text-slate-800" id="out_periodo">Septiembre 2026</span>
                                 </div>
                                 <div class="flex justify-between py-1 border-b border-slate-100">
                                     <span class="text-slate-500 font-medium">Ubicación / Inmueble:</span>
@@ -362,8 +398,8 @@
                                     <span class="font-semibold text-slate-800" id="out_cuenta">Banco de la Nación (Cta. 04-227-354750)</span>
                                 </div>
                                 <div class="flex justify-between py-1 border-b border-slate-100">
-                                    <span class="text-slate-500 font-medium">Fecha y Hora de Operación:</span>
-                                    <span class="font-semibold text-slate-800" id="out_fecha">--</span>
+                                    <span class="text-slate-500 font-medium">Fecha de Operación:</span>
+                                    <span class="font-semibold text-slate-800" id="out_fecha">28 de Septiembre de 2026</span>
                                 </div>
                             </div>
                         </div>
@@ -378,7 +414,7 @@
                         <div class="flex justify-end pt-6">
                             <div class="text-center w-56">
                                 <div class="border-t border-slate-900 pt-1.5">
-                                    <p class="font-bold text-xs text-slate-900 uppercase" id="out_firma_nombre">VÍCTOR ALMIRÓN PINCHI</p>
+                                    <p class="font-bold text-xs text-slate-900 uppercase" id="out_firma_nombre">VICTOR ALMIRÓN PINCHI</p>
                                     <p class="text-[11px] text-slate-500">DNI: <span id="out_firma_dni">42897193</span></p>
                                     <p class="text-[11px] text-slate-500 font-medium">Arrendador / Beneficiario</p>
                                 </div>
@@ -398,15 +434,47 @@
 
     <!-- JAVASCRIPT LOGIC -->
     <script>
-        let lastGeneratedBlob = null;
+        let paymentHistory = JSON.parse(localStorage.getItem('trivani_history')) || [];
 
-        // Función para abrir la ventana de impresión nativa
+        function handleLogin(e) {
+            e.preventDefault();
+            const role = document.getElementById('login_role').value;
+            const user = document.getElementById('login_user').value;
+
+            document.getElementById('loginSection').classList.add('hidden');
+            document.getElementById('mainDashboard').classList.remove('hidden');
+
+            const adminPanel = document.getElementById('adminPanel');
+            const docSection = document.getElementById('docSection');
+            const btnReset = document.getElementById('btnReset');
+
+            if (role === 'ADMIN') {
+                document.getElementById('userRoleBadge').innerText = `Rol: Administrador (${user})`;
+                adminPanel.classList.remove('hidden');
+                btnReset.classList.remove('hidden');
+                docSection.className = "lg:col-span-7 flex justify-center items-start print-area";
+            } else {
+                document.getElementById('userRoleBadge').innerText = `Rol: Inquilino (${user})`;
+                adminPanel.classList.add('hidden'); // Oculta edición e historial
+                btnReset.classList.add('hidden');
+                docSection.className = "lg:col-span-12 flex justify-center items-start print-area"; // Centra la vista
+            }
+        }
+
+        function logout() {
+            document.getElementById('mainDashboard').classList.add('hidden');
+            document.getElementById('loginSection').classList.remove('hidden');
+        }
+
+        function openDNIBusqueda() {
+            window.open('https://dniperu.com/buscar-dni-nombres-apellidos/', '_blank');
+        }
+
         function triggerPrint() {
             saveToHistory();
             window.print();
         }
 
-        // Establece fecha y hora actual por defecto
         function setCurrentDateTime() {
             const now = new Date();
             const meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
@@ -414,18 +482,11 @@
             const dia = now.getDate();
             const mesNombre = meses[now.getMonth()];
             const ano = now.getFullYear();
-            
-            let horas = now.getHours();
-            const minutos = now.getMinutes().toString().padStart(2, '0');
-            const ampm = horas >= 12 ? 'PM' : 'AM';
-            horas = horas % 12;
-            horas = horas ? horas : 12;
-            const strHoras = horas.toString().padStart(2, '0');
 
-            const fechaHoraTexto = `${dia} de ${mesNombre} de ${ano}, ${strHoras}:${minutos} ${ampm}`;
+            const fechaTexto = `${dia} de ${mesNombre} de ${ano}`;
             const periodoTexto = `${mesNombre} ${ano}`;
 
-            document.getElementById('in_fecha').value = fechaHoraTexto;
+            document.getElementById('in_fecha').value = fechaTexto;
             if(!document.getElementById('in_periodo').value || document.getElementById('in_periodo').value === "") {
                 document.getElementById('in_periodo').value = periodoTexto;
             }
@@ -448,8 +509,8 @@
             const decenas = ['', 'Diez', 'Veinte', 'Treinta', 'Cuarenta', 'Cincuenta', 'Sesenta', 'Setenta', 'Ochenta', 'Noventa'];
             const especiales = {
                 11: 'Once', 12: 'Doce', 13: 'Trece', 14: 'Catorce', 15: 'Quince',
-                16: 'Dieciséis', 17: 'Diecisiete', 18: 'Diecisiete', 19: 'Diecinueve',
-                21: 'Veintiuno', 22: 'Veintidós', 23: 'Veintitrés', 24: 'Veinticuatro', 25: 'Veinticinco',
+                16: 'Dieciséis', 17: 'Diecisiete', 18: 'Dieciocho', 19: 'Diecinueve',
+                21: 'Veintiuno', 22: 'Veintidós', 23: 'Veintitrés', 24: 'Veinticinco',
                 26: 'Veintiséis', 27: 'Veintisiete', 28: 'Veintiocho', 29: 'Veintinueve'
             };
             const centenas = ['', 'Ciento', 'Doscientos', 'Trescientos', 'Cuatrocientos', 'Quinientos', 'Seiscientos', 'Setecientos', 'Ochocientos', 'Novecientos'];
@@ -474,10 +535,9 @@
                     }
                 }
                 if (n >= 10) {
-                    output += decenas[Math.floor(n / 10)];
+                    output += decenas[Math.floor(n / 10)] + ' ';
                     n %= 10;
-                    if (n > 0) output += ' y ';
-                    else output += ' ';
+                    if (n > 0) output = output.trim() + ' y ';
                 }
                 if (n > 0) {
                     output += unidades[n] + ' ';
@@ -485,19 +545,28 @@
                 return output;
             }
 
-            let letras = '';
+            let resultado = '';
             if (entero >= 1000) {
                 let miles = Math.floor(entero / 1000);
-                if (miles === 1) letras += 'Mil ';
-                else letras += convertirGrupo(miles) + 'Mil ';
                 entero %= 1000;
+                if (miles === 1) {
+                    resultado += 'Mil ';
+                } else {
+                    resultado += convertirGrupo(miles) + 'Mil ';
+                }
             }
 
             if (entero > 0) {
-                letras += convertirGrupo(entero);
+                resultado += convertirGrupo(entero);
             }
 
-            return letras.trim() + ' y ' + strDecimales;
+            return resultado.trim() + ' y ' + strDecimales;
+        }
+
+        function autoConvertLetters() {
+            const val = parseFloat(document.getElementById('in_monto').value) || 0;
+            document.getElementById('in_monto_letras').value = numeroALetras(val);
+            updatePreview();
         }
 
         function handleAmountChange() {
@@ -505,235 +574,135 @@
             updatePreview();
         }
 
-        function autoConvertLetters() {
-            const val = parseFloat(document.getElementById('in_monto').value) || 0;
-            const texto = numeroALetras(val);
-            document.getElementById('in_monto_letras').value = texto;
-            updatePreview();
-        }
-
         function updatePreview() {
             const inquilino = document.getElementById('in_inquilino').value;
             const dniInquilino = document.getElementById('in_dni_inquilino').value;
-            const arrendador = document.getElementById('in_arrendador').value;
-            const dniArrendador = document.getElementById('in_dni_arrendador').value;
-            const periodo = document.getElementById('in_periodo').value;
-            const montoVal = parseFloat(document.getElementById('in_monto').value) || 0;
-            const montoFormatted = 'S/ ' + montoVal.toFixed(2);
+            const monto = parseFloat(document.getElementById('in_monto').value) || 0;
             const montoLetras = document.getElementById('in_monto_letras').value;
+            const periodo = document.getElementById('in_periodo').value;
+            const fecha = document.getElementById('in_fecha').value;
             const concepto = document.getElementById('in_concepto').value;
             const ubicacion = document.getElementById('in_ubicacion').value;
             const cuenta = document.getElementById('in_cuenta').value;
-            const fecha = document.getElementById('in_fecha').value;
-
-            let mesAnoComp = "2026-09";
-            if(periodo) {
-                mesAnoComp = periodo.replace(/\s+/g, '-').toUpperCase();
-            }
+            const arrendador = document.getElementById('in_arrendador').value;
+            const dniArrendador = document.getElementById('in_dni_arrendador').value;
 
             document.getElementById('out_inquilino').innerText = inquilino;
             document.getElementById('out_dni_inquilino').innerText = dniInquilino;
-            document.getElementById('out_arrendador').innerText = arrendador;
-            document.getElementById('out_dni_arrendador').innerText = dniArrendador;
+            document.getElementById('out_monto').innerText = 'S/ ' + monto.toFixed(2);
+            document.getElementById('out_monto_letras').innerText = montoLetras;
             document.getElementById('out_periodo').innerText = periodo;
             document.getElementById('out_periodo_desc').innerText = periodo;
-            document.getElementById('out_monto').innerText = montoFormatted;
-            document.getElementById('out_monto_letras').innerText = montoLetras;
+            document.getElementById('out_fecha').innerText = fecha;
+            document.getElementById('out_fecha_header').innerText = fecha;
             document.getElementById('out_concepto').innerText = concepto;
             document.getElementById('out_ubicacion').innerText = ubicacion;
             document.getElementById('out_ubicacion_desc').innerText = ubicacion;
             document.getElementById('out_cuenta').innerText = cuenta;
-            document.getElementById('out_fecha').innerText = fecha;
-            document.getElementById('out_fecha_header').innerText = fecha;
-            document.getElementById('out_comprobante').innerText = '001-' + mesAnoComp;
-            
+            document.getElementById('out_arrendador').innerText = arrendador;
+            document.getElementById('out_dni_arrendador').innerText = dniArrendador;
             document.getElementById('out_firma_nombre').innerText = arrendador;
             document.getElementById('out_firma_dni').innerText = dniArrendador;
+
+            const periodoClean = periodo.replace(/[^a-zA-Z0-9]/g, '-').toUpperCase();
+            document.getElementById('out_comprobante').innerText = `001-${periodoClean}`;
         }
 
-        // GENERACIÓN DE PDF Y GUARDADO EN HISTORIAL
-        function generateAndSavePDF() {
-            const element = document.getElementById('receiptToPrint');
-            const inquilino = document.getElementById('in_inquilino').value || "inquilino";
-            const periodo = document.getElementById('in_periodo').value || "periodo";
-            const fileName = `Constancia_Pago_${inquilino.replace(/\s+/g, '_')}_${periodo.replace(/\s+/g, '_')}.pdf`;
-
-            const opt = {
-                margin: 0,
-                filename: fileName,
-                image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2 },
-                jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
-            };
-
-            // Genera el archivo PDF
-            html2pdf().set(opt).from(element).outputPdf('blob').then(function(pdfBlob) {
-                lastGeneratedBlob = new File([pdfBlob], fileName, { type: 'application/pdf' });
-                
-                // Descarga directa
-                const link = document.createElement('a');
-                link.href = URL.createObjectURL(pdfBlob);
-                link.download = fileName;
-                link.click();
-
-                // Guarda en historial
-                saveToHistory();
-                document.getElementById('shareBanner').classList.remove('hidden');
-            });
-        }
-
-        // FUNCIONALIDAD HISTORIAL PERMANENTE (LOCALSTORAGE)
         function saveToHistory() {
-            const data = {
+            const item = {
                 id: Date.now(),
+                comprobante: document.getElementById('out_comprobante').innerText,
                 inquilino: document.getElementById('in_inquilino').value,
-                dniInquilino: document.getElementById('in_dni_inquilino').value,
-                monto: document.getElementById('in_monto').value,
-                montoLetras: document.getElementById('in_monto_letras').value,
+                monto: parseFloat(document.getElementById('in_monto').value).toFixed(2),
                 periodo: document.getElementById('in_periodo').value,
-                fecha: document.getElementById('in_fecha').value,
-                concepto: document.getElementById('in_concepto').value,
-                ubicacion: document.getElementById('in_ubicacion').value,
-                cuenta: document.getElementById('in_cuenta').value,
-                arrendador: document.getElementById('in_arrendador').value,
-                dniArrendador: document.getElementById('in_dni_arrendador').value
+                fecha: document.getElementById('in_fecha').value
             };
 
-            let history = JSON.parse(localStorage.getItem('trivani_payment_history') || '[]');
-            history.unshift(data); // Añade al inicio
-            localStorage.setItem('trivani_payment_history', JSON.stringify(history));
+            paymentHistory.unshift(item);
+            localStorage.setItem('trivani_history', JSON.stringify(paymentHistory));
             renderHistory();
         }
 
         function renderHistory() {
             const container = document.getElementById('historyList');
-            let history = JSON.parse(localStorage.getItem('trivani_payment_history') || '[]');
-
-            if (history.length === 0) {
-                container.innerHTML = `<p class="text-xs text-slate-400 italic text-center py-4">No hay pagos registrados aún en el historial.</p>`;
+            if (paymentHistory.length === 0) {
+                container.innerHTML = '<p class="text-xs text-slate-400 italic text-center py-4">No hay pagos registrados aún en el historial.</p>';
                 return;
             }
 
-            container.innerHTML = history.map(item => `
-                <div class="p-2.5 bg-slate-50 hover:bg-amber-50/50 border border-slate-200 rounded-lg flex items-center justify-between text-xs transition">
+            container.innerHTML = paymentHistory.map(item => `
+                <div class="p-3 bg-slate-50 hover:bg-amber-50/50 rounded-lg border border-slate-200 transition flex items-center justify-between">
                     <div>
-                        <div class="font-bold text-slate-800">${item.inquilino}</div>
-                        <div class="text-[11px] text-slate-500">Periodo: <span class="font-semibold text-slate-700">${item.periodo}</span> | S/ ${parseFloat(item.monto).toFixed(2)}</div>
-                        <div class="text-[10px] text-slate-400">${item.fecha}</div>
+                        <p class="font-bold text-xs text-slate-800">${item.inquilino}</p>
+                        <p class="text-[11px] text-slate-500">${item.periodo} • N° ${item.comprobante}</p>
                     </div>
-                    <div class="flex items-center space-x-1">
-                        <button onclick="loadHistoryItem(${item.id})" title="Cargar Recibo" class="p-1.5 text-amber-600 hover:bg-amber-100 rounded-md">
-                            <i class="fa-solid fa-folder-open"></i>
-                        </button>
-                        <button onclick="deleteHistoryItem(${item.id})" title="Eliminar" class="p-1.5 text-red-500 hover:bg-red-100 rounded-md">
-                            <i class="fa-solid fa-trash"></i>
-                        </button>
+                    <div class="text-right">
+                        <span class="font-extrabold text-xs text-amber-600">S/ ${item.monto}</span>
+                        <p class="text-[10px] text-slate-400">${item.fecha}</p>
                     </div>
                 </div>
             `).join('');
         }
 
-        function loadHistoryItem(id) {
-            let history = JSON.parse(localStorage.getItem('trivani_payment_history') || '[]');
-            const item = history.find(x => x.id === id);
-            if(item) {
-                document.getElementById('in_inquilino').value = item.inquilino;
-                document.getElementById('in_dni_inquilino').value = item.dniInquilino;
-                document.getElementById('in_monto').value = item.monto;
-                document.getElementById('in_monto_letras').value = item.montoLetras;
-                document.getElementById('in_periodo').value = item.periodo;
-                document.getElementById('in_fecha').value = item.fecha;
-                document.getElementById('in_concepto').value = item.concepto;
-                document.getElementById('in_ubicacion').value = item.ubicacion;
-                document.getElementById('in_cuenta').value = item.cuenta;
-                document.getElementById('in_arrendador').value = item.arrendador;
-                document.getElementById('in_dni_arrendador').value = item.dniArrendador;
-                updatePreview();
-            }
-        }
-
-        function deleteHistoryItem(id) {
-            let history = JSON.parse(localStorage.getItem('trivani_payment_history') || '[]');
-            history = history.filter(x => x.id !== id);
-            localStorage.setItem('trivani_payment_history', JSON.stringify(history));
-            renderHistory();
-        }
-
         function clearHistory() {
-            if(confirm("¿Estás seguro de que deseas borrar todo el historial de pagos registrados?")) {
-                localStorage.removeItem('trivani_payment_history');
+            if (confirm('¿Desea borrar todo el historial registrado localmente?')) {
+                paymentHistory = [];
+                localStorage.removeItem('trivani_history');
                 renderHistory();
             }
         }
 
-        // COMPARTIR ARCHIVO PDF
-        async function sharePDFFile() {
-            if (lastGeneratedBlob && navigator.canShare && navigator.canShare({ files: [lastGeneratedBlob] })) {
-                try {
-                    await navigator.share({
-                        files: [lastGeneratedBlob],
-                        title: 'Constancia de Pago de Alquiler',
-                        text: generateShareSummary()
-                    });
-                } catch (err) {
-                    console.log('Error al compartir:', err);
-                }
-            } else {
-                const text = encodeURIComponent(generateShareSummary());
-                window.open(`https://api.whatsapp.com/send?text=${text}`, '_blank');
-            }
+        function resetDefaults() {
+            document.getElementById('in_inquilino').value = 'JUAN ELIAS QUISPE SURCO';
+            document.getElementById('in_dni_inquilino').value = '60241705';
+            document.getElementById('in_monto').value = '630.00';
+            document.getElementById('in_periodo').value = 'Septiembre 2026';
+            document.getElementById('in_fecha').value = '28 de Septiembre de 2026';
+            document.getElementById('in_concepto').value = 'Alquiler de Local Comercial';
+            document.getElementById('in_ubicacion').value = 'Centro Comercial Trivani';
+            document.getElementById('in_cuenta').value = 'Banco de la Nación (Cta. 04-227-354750)';
+            document.getElementById('in_arrendador').value = 'VICTOR ALMIRÓN PINCHI';
+            document.getElementById('in_dni_arrendador').value = '42897193';
+            autoConvertLetters();
         }
 
-        function generateShareSummary() {
-            const inquilino = document.getElementById('in_inquilino').value;
-            const monto = parseFloat(document.getElementById('in_monto').value || 0).toFixed(2);
-            const periodo = document.getElementById('in_periodo').value;
-            const fecha = document.getElementById('in_fecha').value;
-            const comprobante = document.getElementById('out_comprobante').innerText;
+        function generateAndSavePDF() {
+            saveToHistory();
+            const element = document.getElementById('receiptToPrint');
+            const opt = {
+                margin:       [0.2, 0.2, 0.2, 0.2],
+                filename:     `Constancia_${document.getElementById('out_comprobante').innerText}.pdf`,
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2, useCORS: true },
+                jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
+            };
 
-            return `📄 *CONSTANCIA DE PAGO - C.C. TRIVANI*\n` +
-                   `___________________________________\n` +
-                   `👤 *Inquilino:* ${inquilino}\n` +
-                   `💰 *Monto Recibido:* S/ ${monto}\n` +
-                   `📅 *Periodo:* ${periodo}\n` +
-                   `🕒 *Fecha/Hora:* ${fecha}\n` +
-                   `🏷️ *Comprobante N°:* ${comprobante}\n` +
-                   `___________________________________\n` +
-                   `*Estado:* ✅ Recepción conforme registrada.`;
-        }
-
-        function copyShareText() {
-            const summaryText = generateShareSummary();
-            navigator.clipboard.writeText(summaryText).then(() => {
-                const btnText = document.getElementById('copyBtnText');
-                btnText.innerText = "¡Copiado!";
-                setTimeout(() => {
-                    btnText.innerText = "Copiar Resumen";
-                }, 2000);
+            html2pdf().set(opt).from(element).save().then(() => {
+                document.getElementById('shareBanner').classList.remove('hidden');
             });
         }
 
-        function resetDefaults() {
-            document.getElementById('in_inquilino').value = "ANA QUISPE QUISPE";
-            document.getElementById('in_dni_inquilino').value = "23940657";
-            document.getElementById('in_arrendador').value = "VÍCTOR ALMIRÓN PINCHI";
-            document.getElementById('in_dni_arrendador').value = "42897193";
-            document.getElementById('in_monto').value = "500.00";
-            document.getElementById('in_monto_letras').value = "Quinientos y 00/100 Soles";
-            document.getElementById('in_concepto').value = "Alquiler de Local Comercial";
-            document.getElementById('in_ubicacion').value = "Centro Comercial Trivani";
-            document.getElementById('in_cuenta').value = "Banco de la Nación (Cta. 04-227-354750)";
-            document.getElementById('imgLogo').src = "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%230f172a'/><path d='M25 75V35L50 20L75 35V75H60V50H40V75H25Z' fill='%23f59e0b'/><circle cx='50' cy='38' r='6' fill='%23ffffff'/></svg>";
-            
-            document.getElementById('in_periodo').value = "";
-            setCurrentDateTime();
+        function copyShareText() {
+            const txt = `*CONSTANCIA DE PAGO - C.C. TRIVANI*\n` +
+                        `*Comprobante:* ${document.getElementById('out_comprobante').innerText}\n` +
+                        `*Inquilino:* ${document.getElementById('in_inquilino').value}\n` +
+                        `*Monto:* S/ ${parseFloat(document.getElementById('in_monto').value).toFixed(2)}\n` +
+                        `*Periodo:* ${document.getElementById('in_periodo').value}\n` +
+                        `*Fecha:* ${document.getElementById('in_fecha').value}\n` +
+                        `*Arrendador:* ${document.getElementById('in_arrendador').value}`;
+
+            navigator.clipboard.writeText(txt).then(() => {
+                const btn = document.getElementById('copyBtnText');
+                btn.innerText = '¡Copiado!';
+                setTimeout(() => { btn.innerText = 'Copiar Resumen'; }, 2000);
+            });
         }
 
         // Inicialización
         window.onload = function() {
-            setCurrentDateTime();
             renderHistory();
-        }
+            updatePreview();
+        };
     </script>
 </body>
 </html>

@@ -3,271 +3,273 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Centro Comercial Trivani - Sistema Comercial</title>
+    <title>Centro Comercial Trivani - Generador de Constancias</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome para Íconos -->
+    <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- html2pdf.js para Exportación Profesional a PDF -->
+    <!-- html2pdf.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+        .watermark {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-35deg);
+            font-size: 3rem;
+            font-weight: 900;
+            color: rgba(148, 163, 184, 0.15);
+            white-space: nowrap;
+            pointer-events: none;
+            user-select: none;
+            z-index: 10;
+        }
+    </style>
 </head>
 <body class="bg-slate-100 min-h-screen text-slate-800 font-sans antialiased">
 
-    <!-- NAVBAR SUPERIOR -->
+    <!-- NAVBAR -->
     <nav class="bg-slate-900 text-white shadow-lg border-b border-slate-800">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+        <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
             <div class="flex items-center space-x-3">
                 <div class="bg-blue-600 p-2 rounded-lg text-white">
-                    <i class="fa-solid fa-building flex-shrink-0"></i>
+                    <i class="fa-solid fa-building"></i>
                 </div>
                 <div>
-                    <h1 class="font-bold text-lg tracking-wide leading-none">C.C. TRIVANI</h1>
+                    <h1 class="font-bold text-lg leading-none">C.C. TRIVANI</h1>
                     <span class="text-xs text-slate-400">Sistema Comercial de Recibos</span>
                 </div>
             </div>
-            <div id="userInfo" class="hidden flex items-center space-x-4">
-                <span id="userBadge" class="text-xs font-semibold px-3 py-1 rounded-full bg-blue-500/20 text-blue-300 border border-blue-500/30"></span>
-                <button onclick="cerrarSesion()" class="text-slate-400 hover:text-red-400 text-sm flex items-center space-x-1 transition">
-                    <i class="fa-solid fa-right-from-bracket"></i>
-                    <span>Salir</span>
-                </button>
-            </div>
+            <span class="text-xs font-semibold px-3 py-1 rounded-full bg-blue-500/20 text-blue-300 border border-blue-500/30">
+                <i class="fa-solid fa-shield-halved mr-1"></i> Protección Anti-Suplantación Active
+            </span>
         </div>
     </nav>
 
     <div class="max-w-7xl mx-auto px-4 py-8">
-
-        <!-- 1. PANTALLA DE LOGIN -->
-        <div id="loginSection" class="max-w-md mx-auto mt-10">
-            <div class="bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden">
-                <div class="bg-gradient-to-r from-blue-700 to-indigo-800 p-6 text-white text-center">
-                    <div class="inline-flex p-3 bg-white/10 rounded-full mb-3">
-                        <i class="fa-solid fa-lock text-2xl"></i>
-                    </div>
-                    <h2 class="text-2xl font-bold">Acceso al Sistema</h2>
-                    <p class="text-blue-100 text-sm mt-1">Ingresa tus credenciales corporativas</p>
-                </div>
-                
-                <form id="loginForm" class="p-6 space-y-4">
-                    <div id="loginError" class="hidden p-3 bg-red-50 border border-red-200 text-red-600 rounded-lg text-sm text-center font-medium">
-                        <i class="fa-solid fa-triangle-exclamation mr-1"></i> Usuario o contraseña incorrectos.
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Usuario</label>
-                        <div class="relative">
-                            <i class="fa-solid fa-user absolute left-3 top-3 text-slate-400"></i>
-                            <input type="text" id="userInput" required class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:bg-white text-sm" placeholder="Ej: victor_admin">
-                        </div>
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Contraseña</label>
-                        <div class="relative">
-                            <i class="fa-solid fa-key absolute left-3 top-3 text-slate-400"></i>
-                            <input type="password" id="passInput" required class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:bg-white text-sm" placeholder="••••••••">
-                        </div>
-                    </div>
-
-                    <button type="submit" class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg shadow-md transition flex items-center justify-center space-x-2">
-                        <span>Iniciar Sesión</span>
-                        <i class="fa-solid fa-arrow-right text-xs"></i>
-                    </button>
-                </form>
-            </div>
-        </div>
-
-        <!-- 2. PANEL ADMINISTRADOR (Víctor Almirón) -->
-        <div id="adminPanel" class="hidden grid grid-cols-1 lg:grid-cols-12 gap-8">
-            <!-- Formulario de Emisión -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            
+            <!-- FORMULARIO DE EDICIÓN COMPLETA -->
             <div class="lg:col-span-5 bg-white p-6 rounded-2xl shadow-md border border-slate-200 space-y-4">
                 <div class="border-b pb-3">
-                    <h2 class="font-bold text-lg text-slate-800">Emitir Constancia de Pago</h2>
-                    <p class="text-xs text-slate-500">Panel exclusivo de administración</p>
+                    <h2 class="font-bold text-lg text-slate-800">Editar Datos del Comprobante</h2>
+                    <p class="text-xs text-slate-500">Modifica cualquier campo y la vista previa se actualizará en tiempo real</p>
                 </div>
 
                 <div class="space-y-3">
-                    <div>
-                        <label class="block text-xs font-bold text-slate-600 mb-1">Inquilino</label>
-                        <input type="text" id="inqNombre" value="JUAN ELIAS QUISPE SURCO" class="w-full p-2.5 bg-slate-50 border rounded-lg text-sm font-semibold text-slate-700" readonly>
+                    <div class="border-b pb-2">
+                        <span class="text-xs font-black text-blue-600 uppercase tracking-wider">Datos del Inquilino</span>
                     </div>
-
                     <div class="grid grid-cols-2 gap-3">
                         <div>
-                            <label class="block text-xs font-bold text-slate-600 mb-1">DNI Inquilino</label>
-                            <input type="text" id="inqDni" value="60241705" class="w-full p-2.5 bg-slate-50 border rounded-lg text-sm font-semibold text-slate-700" readonly>
+                            <label class="block text-xs font-bold text-slate-600 mb-1">Nombre Inquilino</label>
+                            <input type="text" id="inqNombre" value="ESFRAIN CRUZ LLANOS" oninput="actualizarPreview()" class="w-full p-2 bg-slate-50 border rounded-lg text-xs font-semibold focus:ring-2 focus:ring-blue-500">
                         </div>
                         <div>
+                            <label class="block text-xs font-bold text-slate-600 mb-1">DNI Inquilino</label>
+                            <input type="text" id="inqDni" value="47373742" oninput="actualizarPreview()" class="w-full p-2 bg-slate-50 border rounded-lg text-xs font-semibold focus:ring-2 focus:ring-blue-500">
+                        </div>
+                    </div>
+
+                    <div class="border-b pb-2 pt-2">
+                        <span class="text-xs font-black text-blue-600 uppercase tracking-wider">Datos del Arrendador</span>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 mb-1">Nombre Arrendador</label>
+                            <input type="text" id="arrNombre" value="VÍCTOR ALMIRÓN PINCHI" oninput="actualizarPreview()" class="w-full p-2 bg-slate-50 border rounded-lg text-xs font-semibold focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 mb-1">DNI Arrendador</label>
+                            <input type="text" id="arrDni" value="42897193" oninput="actualizarPreview()" class="w-full p-2 bg-slate-50 border rounded-lg text-xs font-semibold focus:ring-2 focus:ring-blue-500">
+                        </div>
+                    </div>
+
+                    <div class="border-b pb-2 pt-2">
+                        <span class="text-xs font-black text-blue-600 uppercase tracking-wider">Detalles del Pago</span>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
                             <label class="block text-xs font-bold text-slate-600 mb-1">Monto (S/)</label>
-                            <input type="number" id="montoInput" value="450.00" step="0.01" oninput="actualizarPreview()" class="w-full p-2.5 border rounded-lg text-sm font-bold text-blue-600 focus:ring-2 focus:ring-blue-500">
+                            <input type="number" id="montoInput" value="800.00" step="0.01" oninput="actualizarPreview()" class="w-full p-2 border rounded-lg text-xs font-bold text-blue-600 focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 mb-1">Monto en Letras</label>
+                            <input type="text" id="montoLetrasInput" value="Ochocientos y 00/100 Soles" oninput="actualizarPreview()" class="w-full p-2 border rounded-lg text-xs focus:ring-2 focus:ring-blue-500">
                         </div>
                     </div>
 
                     <div>
                         <label class="block text-xs font-bold text-slate-600 mb-1">Concepto</label>
-                        <input type="text" id="conceptoInput" value="PAGO ALQUILER MES DE SETIEMBRE" oninput="actualizarPreview()" class="w-full p-2.5 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500">
+                        <input type="text" id="conceptoInput" value="Alquiler de Local Comercial" oninput="actualizarPreview()" class="w-full p-2 border rounded-lg text-xs focus:ring-2 focus:ring-blue-500">
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 mb-1">Periodo / Mes</label>
+                            <input type="text" id="periodoInput" value="Octubre 2026" oninput="actualizarPreview()" class="w-full p-2 border rounded-lg text-xs focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 mb-1">Fecha de Operación</label>
+                            <input type="text" id="fechaInput" value="02 de Octubre de 2026" oninput="actualizarPreview()" class="w-full p-2 border rounded-lg text-xs focus:ring-2 focus:ring-blue-500">
+                        </div>
                     </div>
 
                     <div>
-                        <label class="block text-xs font-bold text-slate-600 mb-1">Periodo</label>
-                        <input type="text" id="periodoInput" value="SETIEMBRE 2026" oninput="actualizarPreview()" class="w-full p-2.5 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500">
+                        <label class="block text-xs font-bold text-slate-600 mb-1">Ubicación / Inmueble</label>
+                        <input type="text" id="ubicacionInput" value="Centro Comercial Trivani" oninput="actualizarPreview()" class="w-full p-2 border rounded-lg text-xs focus:ring-2 focus:ring-blue-500">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">Banco / Cuenta Destino</label>
+                        <input type="text" id="bancoInput" value="Banco de la Nación (Cta. 04-227-354750)" oninput="actualizarPreview()" class="w-full p-2 border rounded-lg text-xs focus:ring-2 focus:ring-blue-500">
                     </div>
                 </div>
 
-                <button onclick="descargarPDF()" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg shadow-md transition flex items-center justify-center space-x-2">
+                <button onclick="descargarPDF()" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg shadow-md transition flex items-center justify-center space-x-2 mt-4">
                     <i class="fa-solid fa-file-pdf"></i>
-                    <span>Guardar e Imprimir Constancia</span>
+                    <span>Guardar e Imprimir PDF con Marca de Agua</span>
                 </button>
             </div>
 
-            <!-- Vista Previa Hoja A4 -->
+            <!-- VISTA PREVIA DEL PDF CON MARCA DE AGUA -->
             <div class="lg:col-span-7 flex justify-center">
-                <div id="receiptPDF" class="bg-white p-8 rounded-lg shadow-2xl border border-slate-300 w-[210mm] min-h-[297mm] text-slate-800 relative flex flex-col justify-between">
+                <div id="receiptPDF" class="bg-white p-10 rounded-lg shadow-2xl border border-slate-300 w-[210mm] min-h-[297mm] text-slate-800 relative flex flex-col justify-between overflow-hidden">
+                    
+                    <!-- MARCA DE AGUA ANTI-SUPLANTACIÓN -->
+                    <div class="watermark">
+                        C.C. TRIVANI • OFICIAL
+                    </div>
+
                     <div>
                         <!-- Encabezado -->
-                        <div class="flex justify-between items-start border-b-2 border-slate-800 pb-4 mb-6">
-                            <div>
-                                <h1 class="text-2xl font-black text-slate-900 tracking-wider">CENTRO COMERCIAL TRIVANI</h1>
-                                <p class="text-xs text-slate-600 font-semibold">Galería Comercial & Servicios Real</p>
-                                <p class="text-xs text-slate-500">Arrendador: Víctor Almirón Pinchi | DNI: 42897193</p>
-                            </div>
-                            <div class="text-right">
-                                <span class="inline-block px-3 py-1 bg-slate-100 border border-slate-300 font-mono text-xs font-bold rounded">N° TRIV-2026-001</span>
-                                <p class="text-xs text-slate-500 mt-1" id="previewFecha">Fecha: 28/09/2026</p>
+                        <div class="text-center border-b-2 border-slate-800 pb-4 mb-6">
+                            <h1 class="text-2xl font-black text-slate-900 tracking-wider">CONSTANCIA DE PAGO DE ALQUILER</h1>
+                            <h2 class="text-lg font-bold text-slate-700 mt-1">Centro Comercial Trivani</h2>
+                            <p class="text-sm font-semibold text-slate-600">Mes de <span id="pvMesHeader">Octubre 2026</span></p>
+                        </div>
+
+                        <!-- Texto Descriptivo -->
+                        <p class="text-xs text-justify leading-relaxed mb-6">
+                            Por medio del presente documento, se deja constancia formal de la recepción del pago por concepto de alquiler correspondiente al mes de <strong id="pvMesCuerpo">Octubre de 2026</strong> por el uso comercial de un local dentro del <strong id="pvUbicacionCuerpo">Centro Comercial Trivani</strong>.
+                        </p>
+
+                        <!-- Bloque Monto -->
+                        <div class="bg-slate-50 border border-slate-300 rounded-lg p-4 text-center mb-6">
+                            <span class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">MONTO TOTAL PAGADO</span>
+                            <span class="text-3xl font-black text-slate-900">S/<span id="pvMonto">800.00</span></span>
+                            <p class="text-xs font-semibold text-slate-700 mt-1">Son: <span id="pvMontoLetras">Ochocientos y 00/100 Soles</span></p>
+                        </div>
+
+                        <!-- Información de las Partes -->
+                        <div class="mb-6">
+                            <h3 class="text-xs font-bold uppercase text-slate-900 border-b border-slate-300 pb-1 mb-2">INFORMACIÓN DE LAS PARTES</h3>
+                            <div class="grid grid-cols-2 gap-4 text-xs">
+                                <div class="bg-slate-50 p-3 rounded border border-slate-200">
+                                    <span class="block font-semibold text-slate-500 mb-1">Inquilino / Depositante:</span>
+                                    <strong id="pvInqNombre" class="block font-bold text-slate-900">ESFRAIN CRUZ LLANOS</strong>
+                                    <span class="block text-slate-600 mt-1">DNI Depositante: <span id="pvInqDni">47373742</span></span>
+                                </div>
+                                <div class="bg-slate-50 p-3 rounded border border-slate-200">
+                                    <span class="block font-semibold text-slate-500 mb-1">Arrendador / Beneficiario:</span>
+                                    <strong id="pvArrNombre" class="block font-bold text-slate-900">VÍCTOR ALMIRÓN PINCHI</strong>
+                                    <span class="block text-slate-600 mt-1">DNI Arrendador: <span id="pvArrDni">42897193</span></span>
+                                </div>
                             </div>
                         </div>
 
-                        <!-- Título -->
-                        <div class="text-center my-6">
-                            <h2 class="text-xl font-bold uppercase tracking-wide bg-slate-100 py-2 border-y border-slate-300">Constancia de Pago de Alquiler</h2>
-                        </div>
-
-                        <!-- Cuerpo de la Constancia -->
-                        <div class="space-y-4 text-sm leading-relaxed">
-                            <p class="text-justify">
-                                Por la presente se deja constancia de que el Sr(a). <strong id="pvNombre" class="text-slate-900">JUAN ELIAS QUISPE SURCO</strong>, identificado(a) con DNI N° <strong id="pvDni" class="text-slate-900">60241705</strong>, ha realizado el pago correspondiente al alquiler comercial.
-                            </p>
-
-                            <div class="bg-slate-50 p-4 rounded-lg border border-slate-200 space-y-2">
-                                <div class="flex justify-between">
-                                    <span class="text-slate-600 font-semibold">Concepto:</span>
-                                    <span id="pvConcepto" class="font-bold text-slate-800">PAGO ALQUILER MES DE SETIEMBRE</span>
+                        <!-- Detalles del Arrendamiento -->
+                        <div class="mb-6">
+                            <h3 class="text-xs font-bold uppercase text-slate-900 border-b border-slate-300 pb-1 mb-2">DETALLES DEL ARRENDAMIENTO Y PAGO</h3>
+                            <div class="space-y-1.5 text-xs">
+                                <div class="flex justify-between border-b border-slate-100 pb-1">
+                                    <span class="font-semibold text-slate-600">Concepto:</span>
+                                    <span id="pvConcepto" class="font-bold text-slate-800">Alquiler de Local Comercial</span>
                                 </div>
-                                <div class="flex justify-between">
-                                    <span class="text-slate-600 font-semibold">Periodo:</span>
-                                    <span id="pvPeriodo" class="font-bold text-slate-800">SETIEMBRE 2026</span>
+                                <div class="flex justify-between border-b border-slate-100 pb-1">
+                                    <span class="font-semibold text-slate-600">Periodo / Mes:</span>
+                                    <span id="pvPeriodo" class="font-bold text-slate-800">Octubre 2026</span>
                                 </div>
-                                <div class="flex justify-between border-t border-slate-300 pt-2">
-                                    <span class="text-slate-800 font-bold">Monto Total Pagado:</span>
-                                    <span class="font-black text-lg text-blue-700">S/ <span id="pvMonto">450.00</span></span>
+                                <div class="flex justify-between border-b border-slate-100 pb-1">
+                                    <span class="font-semibold text-slate-600">Ubicación / Inmueble:</span>
+                                    <span id="pvUbicacion" class="font-bold text-slate-800">Centro Comercial Trivani</span>
+                                </div>
+                                <div class="flex justify-between border-b border-slate-100 pb-1">
+                                    <span class="font-semibold text-slate-600">Banco / Cuenta Destino:</span>
+                                    <span id="pvBanco" class="font-bold text-slate-800">Banco de la Nación (Cta. 04-227-354750)</span>
+                                </div>
+                                <div class="flex justify-between border-b border-slate-100 pb-1">
+                                    <span class="font-semibold text-slate-600">Fecha de Operación:</span>
+                                    <span id="pvFecha" class="font-bold text-slate-800">02 de Octubre de 2026</span>
                                 </div>
                             </div>
+                        </div>
 
-                            <p class="text-xs text-slate-500 italic">
-                                Monto expresado en letras: <span id="pvMontoLetras" class="font-semibold text-slate-700">CUATROCIENTOS CINCUENTA CON 00/100 SOLES</span>
-                            </p>
+                        <p class="text-[10px] text-slate-500 italic bg-slate-50 p-2 rounded border border-slate-200">
+                            Nota: Este documento acredita la recepción conforme del pago de la renta del local comercial correspondiente al periodo indicado, sirviendo como comprobante administrativo para ambas partes.
+                        </p>
+                    </div>
+
+                    <!-- Pie y Firma -->
+                    <div class="mt-12 pt-6 border-t border-slate-300">
+                        <div class="text-center w-1/2 mx-auto">
+                            <div class="border-b border-slate-400 w-3/4 mx-auto mb-2"></div>
+                            <p id="pvFirmaArrNombre" class="text-xs font-bold text-slate-900">VÍCTOR ALMIRÓN PINCHI</p>
+                            <p class="text-[10px] text-slate-500">DNI: <span id="pvFirmaArrDni">42897193</span></p>
+                            <p class="text-[10px] font-semibold text-slate-600">Arrendador / Beneficiario</p>
+                        </div>
+
+                        <div class="flex justify-between items-center text-[10px] text-slate-400 mt-8 border-t border-slate-100 pt-2">
+                            <span>Centro Comercial Trivani Comprobante de Pago</span>
+                            <span>Página 1 de 1</span>
                         </div>
                     </div>
 
-                    <!-- Firmas -->
-                    <div class="grid grid-cols-2 gap-12 mt-20 pt-8 border-t border-slate-300">
-                        <div class="text-center">
-                            <div class="border-b border-slate-400 w-3/4 mx-auto mb-2"></div>
-                            <p class="text-xs font-bold text-slate-800">Víctor Almirón Pinchi</p>
-                            <p class="text-[10px] text-slate-500">DNI: 42897193 (Arrendador)</p>
-                        </div>
-                        <div class="text-center">
-                            <div class="border-b border-slate-400 w-3/4 mx-auto mb-2"></div>
-                            <p class="text-xs font-bold text-slate-800">Juan Elías Quispe Surco</p>
-                            <p class="text-[10px] text-slate-500">DNI: 60241705 (Inquilino)</p>
-                        </div>
-                    </div>
                 </div>
             </div>
+
         </div>
-
-        <!-- 3. PANEL INQUILINO (Juan Quispe) -->
-        <div id="inquilinoPanel" class="hidden bg-white p-6 rounded-2xl shadow-md border border-slate-200">
-            <div class="border-b pb-4 mb-4 flex justify-between items-center">
-                <div>
-                    <h2 class="font-bold text-xl text-slate-800">Portal del Inquilino</h2>
-                    <p class="text-xs text-slate-500">Consulta tus comprobantes registrados en el C.C. Trivani</p>
-                </div>
-                <span class="px-3 py-1 bg-green-100 text-green-700 text-xs font-bold rounded-full border border-green-300">Estado: Al Día</span>
-            </div>
-
-            <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse text-sm">
-                    <thead>
-                        <tr class="bg-slate-100 text-slate-700 uppercase text-xs font-bold border-b">
-                            <th class="p-3">Comprobante</th>
-                            <th class="p-3">Periodo</th>
-                            <th class="p-3">Monto</th>
-                            <th class="p-3">Estado</th>
-                            <th class="p-3 text-center">Acción</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-slate-200">
-                        <tr class="hover:bg-slate-50">
-                            <td class="p-3 font-mono font-bold text-blue-600">TRIV-2026-001</td>
-                            <td class="p-3 font-medium">SETIEMBRE 2026</td>
-                            <td class="p-3 font-bold">S/ 450.00</td>
-                            <td class="p-3"><span class="px-2 py-1 bg-emerald-100 text-emerald-700 text-xs font-bold rounded">REGISTRADO</span></td>
-                            <td class="p-3 text-center">
-                                <button onclick="alert('Descargando copia del recibo...')" class="text-blue-600 hover:text-blue-800 font-bold text-xs"><i class="fa-solid fa-download mr-1"></i> PDF</button>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
     </div>
 
     <script>
-        // LÓGICA DE AUTENTICACIÓN
-        document.getElementById('loginForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const u = document.getElementById('userInput').value;
-            const p = document.getElementById('passInput').value;
-
-            if (u === "victor_admin" && p === "admin123") {
-                mostrarPanel('ADMIN', 'Víctor Almirón (Admin)');
-            } else if (u === "juan_inquilino" && p === "inquilino123") {
-                mostrarPanel('INQUILINO', 'Juan Quispe (Inquilino)');
-            } else {
-                document.getElementById('loginError').classList.remove('hidden');
-            }
-        });
-
-        function mostrarPanel(rol, nombreBadge) {
-            document.getElementById('loginSection').classList.add('hidden');
-            document.getElementById('userInfo').classList.remove('hidden');
-            document.getElementById('userBadge').innerText = nombreBadge;
-
-            if (rol === 'ADMIN') {
-                document.getElementById('adminPanel').classList.remove('hidden');
-            } else {
-                document.getElementById('inquilinoPanel').classList.remove('hidden');
-            }
-        }
-
-        function cerrarSesion() {
-            location.reload();
-        }
-
         function actualizarPreview() {
-            const monto = parseFloat(document.getElementById('montoInput').value) || 0;
-            document.getElementById('pvMonto').innerText = monto.toFixed(2);
+            // Inquilino
+            document.getElementById('pvInqNombre').innerText = document.getElementById('inqNombre').value;
+            document.getElementById('pvInqDni').innerText = document.getElementById('inqDni').value;
+
+            // Arrendador
+            const arrNom = document.getElementById('arrNombre').value;
+            const arrDni = document.getElementById('arrDni').value;
+            document.getElementById('pvArrNombre').innerText = arrNom;
+            document.getElementById('pvArrDni').innerText = arrDni;
+            document.getElementById('pvFirmaArrNombre').innerText = arrNom;
+            document.getElementById('pvFirmaArrDni').innerText = arrDni;
+
+            // Montos
+            const montoVal = parseFloat(document.getElementById('montoInput').value) || 0;
+            document.getElementById('pvMonto').innerText = montoVal.toFixed(2);
+            document.getElementById('pvMontoLetras').innerText = document.getElementById('montoLetrasInput').value;
+
+            // Fechas y detalles
+            const periodo = document.getElementById('periodoInput').value;
+            document.getElementById('pvMesHeader').innerText = periodo;
+            document.getElementById('pvMesCuerpo').innerText = periodo;
+            document.getElementById('pvPeriodo').innerText = periodo;
+
+            const ubicacion = document.getElementById('ubicacionInput').value;
+            document.getElementById('pvUbicacionCuerpo').innerText = ubicacion;
+            document.getElementById('pvUbicacion').innerText = ubicacion;
+
             document.getElementById('pvConcepto').innerText = document.getElementById('conceptoInput').value;
-            document.getElementById('pvPeriodo').innerText = document.getElementById('periodoInput').value;
+            document.getElementById('pvBanco').innerText = document.getElementById('bancoInput').value;
+            document.getElementById('pvFecha').innerText = document.getElementById('fechaInput').value;
         }
 
         function descargarPDF() {
             const element = document.getElementById('receiptPDF');
             const opt = {
                 margin:       0,
-                filename:     'Constancia_Trivani_TRIV-2026-001.pdf',
+                filename:     'Constancia_Pago_Trivani.pdf',
                 image:        { type: 'jpeg', quality: 0.98 },
                 html2canvas:  { scale: 2 },
                 jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }

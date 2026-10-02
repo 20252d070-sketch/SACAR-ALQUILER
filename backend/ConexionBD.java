@@ -5,7 +5,7 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 
 public class ConexionBD {
-    private static final String URL = "jdbc:mysql://localhost:3306/trivani_db";
+    private static final String URL = "jdbc:mysql://localhost:3306/trivani_db?useUnicode=true&characterEncoding=UTF-8";
     private static final String USER = "root";
     private static final String PASSWORD = "";
 
@@ -14,7 +14,7 @@ public class ConexionBD {
             Class.forName("com.mysql.cj.jdbc.Driver");
             return DriverManager.getConnection(URL, USER, PASSWORD);
         } catch (ClassNotFoundException e) {
-            throw new SQLException("Controlador JDBC no encontrado", e);
+            throw new SQLException("Controlador JDBC de MySQL no encontrado", e);
         }
     }
 }

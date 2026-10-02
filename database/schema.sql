@@ -10,17 +10,7 @@ CREATE TABLE IF NOT EXISTS inquilinos (
     creado_en TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- 2. Tabla de Usuarios y Seguridad (Roles Reales)
-CREATE TABLE IF NOT EXISTS usuarios (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    usuario VARCHAR(50) UNIQUE NOT NULL,
-    password_hash VARCHAR(255) NOT NULL,
-    rol ENUM('ADMIN', 'INQUILINO') NOT NULL,
-    inquilino_id INT NULL,
-    FOREIGN KEY (inquilino_id) REFERENCES inquilinos(id) ON DELETE SET NULL
-);
-
--- 3. Tabla de Pagos / Constancias
+-- 2. Tabla de Pagos / Constancias
 CREATE TABLE IF NOT EXISTS pagos (
     id INT AUTO_INCREMENT PRIMARY KEY,
     comprobante_codigo VARCHAR(50) NOT NULL,
@@ -35,16 +25,8 @@ CREATE TABLE IF NOT EXISTS pagos (
     arrendador_nombre VARCHAR(150) NOT NULL,
     arrendador_dni VARCHAR(15) NOT NULL,
     fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (inquilino_id) REFERENCES inquilinos(id)
+    FOREIGN KEY (inquilino_id) REFERENCES inquilinos(id) ON DELETE CASCADE
 );
 
--- DATOS INICIALES REALES
-INSERT INTO inquilinos (id, nombre, dni) VALUES (1, 'JUAN ELIAS QUISPE SURCO', '60241705');
-
--- Usuario Administrador (Víctor Almirón)
-INSERT INTO usuarios (usuario, password_hash, rol, inquilino_id) 
-VALUES ('victor_admin', 'admin123', 'ADMIN', NULL);
-
--- Usuario Inquilino (Juan Quispe)
-INSERT INTO usuarios (usuario, password_hash, rol, inquilino_id) 
-VALUES ('juan_inquilino', 'inquilino123', 'INQUILINO', 1);
+-- DATOS INICIALES DE PRUEBA
+INSERT INTO inquilinos (id, nombre, dni) VALUES (1, 'ESFRAIN CRUZ LLANOS', '47373742');

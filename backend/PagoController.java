@@ -2,7 +2,10 @@ package com.trivani.backend;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class PagoController {
 
@@ -33,5 +36,38 @@ public class PagoController {
             e.printStackTrace();
             return false;
         }
+    }
+
+    public List<Pago> obtenerTodosLosPagos() {
+        List<Pago> lista = new ArrayList<>();
+        String sql = "SELECT * FROM pagos ORDER BY fecha_registro DESC";
+
+        try (Connection conn = ConexionBD.obtenerConexion();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+
+            while (rs.next()) {
+                Pago p = new Pago();
+                p.setId(rs.getInt("id"));
+                p.setComprobanteCodigo(rs.getString("comprobante_codigo"));
+                p.setInquilinoId(rs.getInt("inquilino_id"));
+                p.setMonto(rs.getBigDecimal("monto"));
+                p.setMontoLetras(rs.getString("monto_letras"));
+                p.setPeriodo(rs.getString("periodo"));
+                p.setFechaOperacion(rs.getDate("fecha_operacion").toLocalDate());
+                p.setConcepto(rs.getString("concepto"));
+                p.setUbicacion(rs.getString("ubicacion"));
+                p.setCuentaDestino(rs.getString("cuenta_destino"));
+                p.setArrendadorNombre(rs.getString("arrendador_nombre"));
+                p.setArrendadorDni(rs.getString("arrendador_dni"));
+                
+                lista.add(p);
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return lista;
     }
 }

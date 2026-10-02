@@ -20,6 +20,24 @@ public class Pago {
     // Constructor vacío
     public Pago() {}
 
+    // Constructor completo
+    public Pago(Integer id, String comprobanteCodigo, Integer inquilinoId, BigDecimal monto, 
+                String montoLetras, String periodo, LocalDate fechaOperacion, String concepto, 
+                String ubicacion, String cuentaDestino, String arrendadorNombre, String arrendadorDni) {
+        this.id = id;
+        this.comprobanteCodigo = comprobanteCodigo;
+        this.inquilinoId = inquilinoId;
+        this.monto = monto;
+        this.montoLetras = montoLetras;
+        this.periodo = periodo;
+        this.fechaOperacion = fechaOperacion;
+        this.concepto = concepto;
+        this.ubicacion = ubicacion;
+        this.cuentaDestino = cuentaDestino;
+        this.arrendadorNombre = arrendadorNombre;
+        this.arrendadorDni = arrendadorDni;
+    }
+
     // Getters y Setters
     public Integer getId() { return id; }
     public void setId(Integer id) { this.id = id; }

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Centro Comercial Trivani - Constancia de Pago</title>
+    <title>Centro Comercial Trivani - Sistema de Constancias e Historial</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome -->
@@ -37,23 +37,25 @@
                 </div>
                 <div>
                     <h1 class="font-bold text-lg leading-none">C.C. TRIVANI</h1>
-                    <span class="text-xs text-slate-400">Sistema Comercial de Recibos y Servicios</span>
+                    <span class="text-xs text-slate-400">Sistema Comercial de Recibos e Historial en la Nube</span>
                 </div>
             </div>
             <span class="text-xs font-semibold px-3 py-1 rounded-full bg-teal-500/20 text-teal-300 border border-teal-500/30">
-                <i class="fa-solid fa-shield-halved mr-1"></i> Protección Anti-Suplantación Activa
+                <i class="fa-solid fa-cloud-arrow-up mr-1"></i> Nube Sincronizada
             </span>
         </div>
     </nav>
 
-    <div class="max-w-7xl mx-auto px-4 py-8">
+    <div class="max-w-7xl mx-auto px-4 py-8 space-y-8">
+        
+        <!-- PANEL PRINCIPAL (EDITOR + VISTA PREVIA) -->
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
             
             <!-- FORMULARIO DE EDICIÓN -->
             <div class="lg:col-span-5 bg-white p-6 rounded-2xl shadow-md border border-slate-200 space-y-4">
                 <div class="border-b pb-3">
                     <h2 class="font-bold text-lg text-slate-800">Editar Datos del Comprobante</h2>
-                    <p class="text-xs text-slate-500">Modifica los campos para actualizar la constante en tiempo real</p>
+                    <p class="text-xs text-slate-500">Modifica los campos para actualizar la vista previa</p>
                 </div>
 
                 <div class="space-y-3">
@@ -61,7 +63,7 @@
                         <span class="text-xs font-black text-teal-700 uppercase tracking-wider">Tipo de Comprobante</span>
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-slate-600 mb-1">Título del Documento</label>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">Tipo de Servicio</label>
                         <select id="tipoComprobante" onchange="cambiarTipoComprobante()" class="w-full p-2 bg-slate-50 border rounded-lg text-xs font-bold text-teal-800 focus:ring-2 focus:ring-teal-500">
                             <option value="SERVICIO DE LUZ">CONSTANCIA DE PAGO — SERVICIO DE LUZ</option>
                             <option value="ALQUILER DE LOCAL">CONSTANCIA DE PAGO — ALQUILER DE LOCAL</option>
@@ -125,41 +127,36 @@
                     </div>
                 </div>
 
-                <button onclick="descargarPDF()" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg shadow-md transition flex items-center justify-center space-x-2 mt-4">
-                    <i class="fa-solid fa-file-pdf"></i>
-                    <span>Guardar e Imprimir PDF con Marca de Agua</span>
+                <button onclick="guardarEImprimir()" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg shadow-md transition flex items-center justify-center space-x-2 mt-4">
+                    <i class="fa-solid fa-cloud-arrow-up"></i>
+                    <span>Guardar en Nube e Imprimir PDF</span>
                 </button>
             </div>
 
-            <!-- VISTA PREVIA FORMATO NUEVO -->
+            <!-- VISTA PREVIA DEL DOCUMENTO -->
             <div class="lg:col-span-7 flex justify-center">
                 <div id="receiptPDF" class="bg-white p-10 rounded-lg shadow-2xl border border-slate-300 w-[210mm] min-h-[297mm] text-slate-800 relative flex flex-col justify-between overflow-hidden">
                     
-                    <!-- MARCA DE AGUA ANTI-SUPLANTACIÓN -->
                     <div class="watermark">
                         C.C. TRIVANI • DOCUMENTO OFICIAL
                     </div>
 
                     <div>
-                        <!-- Encabezado Estilo Banner -->
                         <div class="text-center pb-4 mb-6 border-b-2 border-teal-700">
                             <h1 id="pvTituloHeader" class="text-xl font-extrabold text-teal-800 tracking-wide uppercase">CONSTANCIA DE PAGO — SERVICIO DE LUZ</h1>
                             <p class="text-xs font-semibold text-slate-500 mt-1">Centro Comercial Trivani — Mes de <span id="pvMesHeader">Octubre 2026</span></p>
                         </div>
 
-                        <!-- Texto Descriptivo Formato Original -->
                         <p class="text-xs text-slate-600 text-justify leading-relaxed mb-6">
                             Por medio del presente documento, se deja constancia formal de la recepción del pago por concepto del <strong id="pvTextoConcepto">"servicio de energía eléctrica (luz)"</strong> correspondiente al mes de <strong id="pvMesCuerpo">Octubre de 2026</strong> por el uso del local comercial dentro del <strong id="pvUbicacionCuerpo">Centro Comercial Trivani</strong>.
                         </p>
 
-                        <!-- Bloque Monto -->
                         <div class="bg-slate-50 border border-slate-200 rounded-md p-4 text-center mb-6">
                             <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">MONTO TOTAL PAGADO</span>
                             <span class="text-2xl font-black text-slate-900">S/ <span id="pvMonto">93.60</span></span>
                             <p class="text-xs font-medium text-slate-500 mt-1">Son: <span id="pvMontoLetras">Noventa y tres y 60/100 Soles</span></p>
                         </div>
 
-                        <!-- Información de las Partes (Formato Líneas Horizontales) -->
                         <div class="mb-6">
                             <h3 class="text-xs font-bold uppercase text-teal-800 mb-2">INFORMACIÓN DE LAS PARTES</h3>
                             <div class="border-t border-slate-200 divide-y divide-slate-200 text-xs">
@@ -182,7 +179,6 @@
                             </div>
                         </div>
 
-                        <!-- Detalles del Servicio y Pago (Formato Líneas Horizontales) -->
                         <div class="mb-6">
                             <h3 class="text-xs font-bold uppercase text-teal-800 mb-2">DETALLES DEL SERVICIO Y PAGO</h3>
                             <div class="border-t border-slate-200 divide-y divide-slate-200 text-xs">
@@ -214,7 +210,6 @@
                         </p>
                     </div>
 
-                    <!-- Pie y Firma -->
                     <div class="mt-12 pt-6">
                         <div class="text-center w-1/2 mx-auto">
                             <div class="border-b border-slate-400 w-3/4 mx-auto mb-2"></div>
@@ -233,7 +228,110 @@
             </div>
 
         </div>
+
+        <!-- TABLA DE HISTORIAL DE PAGOS EN LA NUBE -->
+        <div class="bg-white p-6 rounded-2xl shadow-md border border-slate-200">
+            <div class="flex items-center justify-between border-b pb-4 mb-4">
+                <div>
+                    <h2 class="font-bold text-lg text-slate-800 flex items-center space-x-2">
+                        <i class="fa-solid fa-clock-rotate-left text-teal-600"></i>
+                        <span>Historial de Pagos Registrados (Nube)</span>
+                    </h2>
+                    <p class="text-xs text-slate-500">Sincronizado en tiempo real entre todos tus dispositivos</p>
+                </div>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-xs text-slate-600">
+                    <thead class="bg-slate-100 text-slate-700 uppercase font-bold text-[10px]">
+                        <tr>
+                            <th class="p-3">Fecha Op.</th>
+                            <th class="p-3">Tipo / Concepto</th>
+                            <th class="p-3">Inquilino</th>
+                            <th class="p-3">Periodo</th>
+                            <th class="p-3">Monto</th>
+                            <th class="p-3 text-center">Registro</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tablaHistorial" class="divide-y divide-slate-200 font-medium">
+                        <tr>
+                            <td colspan="6" class="p-4 text-center text-slate-400">Cargando pagos desde la nube...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
     </div>
+
+    <!-- FIREBASE SDKS (CON TUS CREDENCIALES INTEGRADAS) -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "ATzaSyA3KMVMq-HcGhn1DuTk868J8cylorSjtiU",
+            authDomain: "trivanipagos.firebaseapp.com",
+            projectId: "trivanipagos",
+            storageBucket: "trivanipagos.firebasestorage.app",
+            messagingSenderId: "505581253434",
+            appId: "1:505581253434:web:e4cd15c81ae8be65a81603",
+            measurementId: "G-TKVCZRMFT2"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // LEER HISTORIAL EN TIEMPO REAL DESDE CUALQUIER DISPOSITIVO
+        const q = query(collection(db, "pagos_trivani"), orderBy("registroNube", "desc"));
+        onSnapshot(q, (snapshot) => {
+            const tabla = document.getElementById('tablaHistorial');
+            tabla.innerHTML = '';
+
+            if (snapshot.empty) {
+                tabla.innerHTML = '<tr><td colspan="6" class="p-4 text-center text-slate-400">No hay pagos registrados aún en la nube.</td></tr>';
+                return;
+            }
+
+            snapshot.forEach((doc) => {
+                const data = doc.data();
+                const fila = `
+                    <tr class="hover:bg-slate-50 transition">
+                        <td class="p-3 font-bold text-slate-800">${data.fechaOperacion}</td>
+                        <td class="p-3">${data.concepto}</td>
+                        <td class="p-3 font-semibold text-slate-900">${data.inquilino} (DNI ${data.dniInquilino})</td>
+                        <td class="p-3">${data.periodo}</td>
+                        <td class="p-3 font-bold text-teal-700">S/ ${parseFloat(data.monto).toFixed(2)}</td>
+                        <td class="p-3 text-center text-[10px] text-slate-400">${data.registroNube ? new Date(data.registroNube.toDate()).toLocaleString('es-PE') : 'Reciente'}</td>
+                    </tr>
+                `;
+                tabla.innerHTML += fila;
+            });
+        });
+
+        // GUARDAR PAGO EN LA NUBE E IMPRIMIR
+        window.guardarEImprimir = async function() {
+            const datosPago = {
+                tipoComprobante: document.getElementById('tipoComprobante').value,
+                inquilino: document.getElementById('inqNombre').value,
+                dniInquilino: document.getElementById('inqDni').value,
+                monto: parseFloat(document.getElementById('montoInput').value) || 0,
+                concepto: document.getElementById('conceptoInput').value,
+                periodo: document.getElementById('periodoInput').value,
+                fechaOperacion: document.getElementById('fechaInput').value,
+                arrendador: "VÍCTOR ALMIRÓN PINCHI",
+                registroNube: new Date()
+            };
+
+            try {
+                await addDoc(collection(db, "pagos_trivani"), datosPago);
+                descargarPDF();
+            } catch (e) {
+                alert("Error al guardar en la nube: " + e.message);
+                descargarPDF();
+            }
+        };
+    </script>
 
     <script>
         function cambiarTipoComprobante() {
@@ -274,16 +372,13 @@
         }
 
         function actualizarPreview() {
-            // Inquilino
             document.getElementById('pvInqNombre').innerText = document.getElementById('inqNombre').value;
             document.getElementById('pvInqDni').innerText = document.getElementById('inqDni').value;
 
-            // Montos
             const montoVal = parseFloat(document.getElementById('montoInput').value) || 0;
             document.getElementById('pvMonto').innerText = montoVal.toFixed(2);
             document.getElementById('pvMontoLetras').innerText = document.getElementById('montoLetrasInput').value;
 
-            // Fechas y detalles
             const periodo = document.getElementById('periodoInput').value;
             document.getElementById('pvMesHeader').innerText = periodo;
             document.getElementById('pvMesCuerpo').innerText = periodo;

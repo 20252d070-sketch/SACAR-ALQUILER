@@ -8,8 +8,6 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- html2pdf.js -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         .watermark {
             position: absolute;
@@ -23,6 +21,26 @@
             pointer-events: none;
             user-select: none;
             z-index: 10;
+        }
+
+        /* CONFIGURACIÓN DE IMPRESIÓN PARA QUE SOLO SALGA EL COMPROBANTE */
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            #receiptPDF, #receiptPDF * {
+                visibility: visible;
+            }
+            #receiptPDF {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                margin: 0;
+                padding: 20px;
+                border: none;
+                box-shadow: none;
+            }
         }
     </style>
 </head>
@@ -295,7 +313,7 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // LEER HISTORIAL EN TIEMPO REAL DESDE CUALQUIER DISPOSITIVO
+        // LEER HISTORIAL EN TIEMPO REAL
         const q = query(collection(db, "pagos_trivani"), orderBy("registroNube", "desc"));
         onSnapshot(q, (snapshot) => {
             const tabla = document.getElementById('tablaHistorial');
@@ -310,16 +328,19 @@
                 const data = doc.data();
                 const fila = `
                     <tr class="hover:bg-slate-50 transition">
-                        <td class="p-3 font-bold text-slate-800">${data.fechaOperacion}</td>
-                        <td class="p-3">${data.concepto}</td>
-                        <td class="p-3 font-semibold text-slate-900">${data.inquilino} (DNI ${data.dniInquilino})</td>
-                        <td class="p-3">${data.periodo}</td>
-                        <td class="p-3 font-bold text-teal-700">S/ ${parseFloat(data.monto).toFixed(2)}</td>
+                        <td class="p-3 font-bold text-slate-800">${data.fechaOperacion || '-'}</td>
+                        <td class="p-3">${data.concepto || '-'}</td>
+                        <td class="p-3 font-semibold text-slate-900">${data.inquilino || '-'} (DNI ${data.dniInquilino || '-'})</td>
+                        <td class="p-3">${data.periodo || '-'}</td>
+                        <td class="p-3 font-bold text-teal-700">S/ ${parseFloat(data.monto || 0).toFixed(2)}</td>
                         <td class="p-3 text-center text-[10px] text-slate-400">${data.registroNube ? new Date(data.registroNube.toDate()).toLocaleString('es-PE') : 'Reciente'}</td>
                     </tr>
                 `;
                 tabla.innerHTML += fila;
             });
+        }, (error) => {
+            console.error("Error al leer Firestore:", error);
+            document.getElementById('tablaHistorial').innerHTML = '<tr><td colspan="6" class="p-4 text-center text-red-500 font-bold">Error de permisos en Firebase. Revisa las reglas de lectura/escritura en la consola.</td></tr>';
         });
 
         // GUARDAR PAGO EN LA NUBE E IMPRIMIR
@@ -338,9 +359,9 @@
 
             try {
                 await addDoc(collection(db, "pagos_trivani"), datosPago);
-                descargarPDF();
             } catch (e) {
-                alert("Error al guardar en la nube: " + e.message);
+                console.error("Error guardando en Firestore: ", e);
+            } finally {
                 descargarPDF();
             }
         };
@@ -407,15 +428,7 @@
         }
 
         function descargarPDF() {
-            const element = document.getElementById('receiptPDF');
-            const opt = {
-                margin:       0,
-                filename:     'Constancia_Pago_Trivani.pdf',
-                image:        { type: 'jpeg', quality: 0.98 },
-                html2canvas:  { scale: 2 },
-                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
-            };
-            html2pdf().set(opt).from(element).save();
+            window.print();
         }
     </script>
 </body>

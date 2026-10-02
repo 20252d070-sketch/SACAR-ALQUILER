@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Centro Comercial Trivani - Generador de Constancias</title>
+    <title>Centro Comercial Trivani - Constancia de Pago</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome -->
@@ -16,9 +16,9 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%) rotate(-35deg);
-            font-size: 3rem;
+            font-size: 2.8rem;
             font-weight: 900;
-            color: rgba(148, 163, 184, 0.15);
+            color: rgba(148, 163, 184, 0.12);
             white-space: nowrap;
             pointer-events: none;
             user-select: none;
@@ -32,15 +32,15 @@
     <nav class="bg-slate-900 text-white shadow-lg border-b border-slate-800">
         <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
             <div class="flex items-center space-x-3">
-                <div class="bg-blue-600 p-2 rounded-lg text-white">
-                    <i class="fa-solid fa-building"></i>
+                <div class="bg-teal-600 p-2 rounded-lg text-white">
+                    <i class="fa-solid fa-bolt"></i>
                 </div>
                 <div>
                     <h1 class="font-bold text-lg leading-none">C.C. TRIVANI</h1>
-                    <span class="text-xs text-slate-400">Sistema Comercial de Recibos</span>
+                    <span class="text-xs text-slate-400">Sistema Comercial de Recibos y Servicios</span>
                 </div>
             </div>
-            <span class="text-xs font-semibold px-3 py-1 rounded-full bg-blue-500/20 text-blue-300 border border-blue-500/30">
+            <span class="text-xs font-semibold px-3 py-1 rounded-full bg-teal-500/20 text-teal-300 border border-teal-500/30">
                 <i class="fa-solid fa-shield-halved mr-1"></i> Protección Anti-Suplantación Activa
             </span>
         </div>
@@ -53,62 +53,75 @@
             <div class="lg:col-span-5 bg-white p-6 rounded-2xl shadow-md border border-slate-200 space-y-4">
                 <div class="border-b pb-3">
                     <h2 class="font-bold text-lg text-slate-800">Editar Datos del Comprobante</h2>
-                    <p class="text-xs text-slate-500">Modifica los campos necesarios para actualizar la vista previa</p>
+                    <p class="text-xs text-slate-500">Modifica los campos para actualizar la constante en tiempo real</p>
                 </div>
 
                 <div class="space-y-3">
                     <div class="border-b pb-2">
-                        <span class="text-xs font-black text-blue-600 uppercase tracking-wider">Datos del Inquilino</span>
+                        <span class="text-xs font-black text-teal-700 uppercase tracking-wider">Tipo de Comprobante</span>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">Título del Documento</label>
+                        <select id="tipoComprobante" onchange="cambiarTipoComprobante()" class="w-full p-2 bg-slate-50 border rounded-lg text-xs font-bold text-teal-800 focus:ring-2 focus:ring-teal-500">
+                            <option value="SERVICIO DE LUZ">CONSTANCIA DE PAGO — SERVICIO DE LUZ</option>
+                            <option value="ALQUILER DE LOCAL">CONSTANCIA DE PAGO — ALQUILER DE LOCAL</option>
+                            <option value="SERVICIO DE AGUA">CONSTANCIA DE PAGO — SERVICIO DE AGUA</option>
+                            <option value="MANTENIMIENTO">CONSTANCIA DE PAGO — MANTENIMIENTO</option>
+                        </select>
+                    </div>
+
+                    <div class="border-b pb-2 pt-2">
+                        <span class="text-xs font-black text-teal-700 uppercase tracking-wider">Datos del Inquilino</span>
                     </div>
                     <div class="grid grid-cols-2 gap-3">
                         <div>
                             <label class="block text-xs font-bold text-slate-600 mb-1">Nombre Inquilino</label>
-                            <input type="text" id="inqNombre" value="ESFRAIN CRUZ LLANOS" oninput="actualizarPreview()" class="w-full p-2 bg-slate-50 border rounded-lg text-xs font-semibold focus:ring-2 focus:ring-blue-500">
+                            <input type="text" id="inqNombre" value="ESFRAIN CRUZ LLANOS" oninput="actualizarPreview()" class="w-full p-2 bg-slate-50 border rounded-lg text-xs font-semibold focus:ring-2 focus:ring-teal-500">
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-slate-600 mb-1">DNI Inquilino</label>
-                            <input type="text" id="inqDni" value="47373742" oninput="actualizarPreview()" class="w-full p-2 bg-slate-50 border rounded-lg text-xs font-semibold focus:ring-2 focus:ring-blue-500">
+                            <input type="text" id="inqDni" value="47373742" oninput="actualizarPreview()" class="w-full p-2 bg-slate-50 border rounded-lg text-xs font-semibold focus:ring-2 focus:ring-teal-500">
                         </div>
                     </div>
 
                     <div class="border-b pb-2 pt-2">
-                        <span class="text-xs font-black text-blue-600 uppercase tracking-wider">Detalles del Pago</span>
+                        <span class="text-xs font-black text-teal-700 uppercase tracking-wider">Detalles del Pago</span>
                     </div>
                     <div class="grid grid-cols-2 gap-3">
                         <div>
                             <label class="block text-xs font-bold text-slate-600 mb-1">Monto (S/)</label>
-                            <input type="number" id="montoInput" value="800.00" step="0.01" oninput="actualizarPreview()" class="w-full p-2 border rounded-lg text-xs font-bold text-blue-600 focus:ring-2 focus:ring-blue-500">
+                            <input type="number" id="montoInput" value="93.60" step="0.01" oninput="actualizarPreview()" class="w-full p-2 border rounded-lg text-xs font-bold text-teal-700 focus:ring-2 focus:ring-teal-500">
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-slate-600 mb-1">Monto en Letras</label>
-                            <input type="text" id="montoLetrasInput" value="Ochocientos y 00/100 Soles" oninput="actualizarPreview()" class="w-full p-2 border rounded-lg text-xs focus:ring-2 focus:ring-blue-500">
+                            <input type="text" id="montoLetrasInput" value="Noventa y tres y 60/100 Soles" oninput="actualizarPreview()" class="w-full p-2 border rounded-lg text-xs focus:ring-2 focus:ring-teal-500">
                         </div>
                     </div>
 
                     <div>
                         <label class="block text-xs font-bold text-slate-600 mb-1">Concepto</label>
-                        <input type="text" id="conceptoInput" value="Alquiler de Local Comercial" oninput="actualizarPreview()" class="w-full p-2 border rounded-lg text-xs focus:ring-2 focus:ring-blue-500">
+                        <input type="text" id="conceptoInput" value="Pago de Servicio de Energía Eléctrica (Luz)" oninput="actualizarPreview()" class="w-full p-2 border rounded-lg text-xs focus:ring-2 focus:ring-teal-500">
                     </div>
 
                     <div class="grid grid-cols-2 gap-3">
                         <div>
                             <label class="block text-xs font-bold text-slate-600 mb-1">Periodo / Mes</label>
-                            <input type="text" id="periodoInput" value="Octubre 2026" oninput="actualizarPreview()" class="w-full p-2 border rounded-lg text-xs focus:ring-2 focus:ring-blue-500">
+                            <input type="text" id="periodoInput" value="Octubre 2026" oninput="actualizarPreview()" class="w-full p-2 border rounded-lg text-xs focus:ring-2 focus:ring-teal-500">
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-slate-600 mb-1">Fecha de Operación</label>
-                            <input type="text" id="fechaInput" value="02 de Octubre de 2026" oninput="actualizarPreview()" class="w-full p-2 border rounded-lg text-xs focus:ring-2 focus:ring-blue-500">
+                            <input type="text" id="fechaInput" value="02 de Octubre de 2026" oninput="actualizarPreview()" class="w-full p-2 border rounded-lg text-xs focus:ring-2 focus:ring-teal-500">
                         </div>
                     </div>
 
                     <div>
                         <label class="block text-xs font-bold text-slate-600 mb-1">Ubicación / Inmueble</label>
-                        <input type="text" id="ubicacionInput" value="Centro Comercial Trivani" oninput="actualizarPreview()" class="w-full p-2 border rounded-lg text-xs focus:ring-2 focus:ring-blue-500">
+                        <input type="text" id="ubicacionInput" value="Centro Comercial Trivani" oninput="actualizarPreview()" class="w-full p-2 border rounded-lg text-xs focus:ring-2 focus:ring-teal-500">
                     </div>
 
                     <div>
                         <label class="block text-xs font-bold text-slate-600 mb-1">Banco / Cuenta Destino</label>
-                        <input type="text" id="bancoInput" value="Banco de la Nación (Cta. 04-227-354750)" oninput="actualizarPreview()" class="w-full p-2 border rounded-lg text-xs focus:ring-2 focus:ring-blue-500">
+                        <input type="text" id="bancoInput" value="Banco de la Nación (Cta. 04-227-354750)" oninput="actualizarPreview()" class="w-full p-2 border rounded-lg text-xs focus:ring-2 focus:ring-teal-500">
                     </div>
                 </div>
 
@@ -118,86 +131,91 @@
                 </button>
             </div>
 
-            <!-- VISTA PREVIA DEL PDF CON MARCA DE AGUA -->
+            <!-- VISTA PREVIA FORMATO NUEVO -->
             <div class="lg:col-span-7 flex justify-center">
                 <div id="receiptPDF" class="bg-white p-10 rounded-lg shadow-2xl border border-slate-300 w-[210mm] min-h-[297mm] text-slate-800 relative flex flex-col justify-between overflow-hidden">
                     
                     <!-- MARCA DE AGUA ANTI-SUPLANTACIÓN -->
                     <div class="watermark">
-                        C.C. TRIVANI • OFICIAL
+                        C.C. TRIVANI • DOCUMENTO OFICIAL
                     </div>
 
                     <div>
-                        <!-- Encabezado -->
-                        <div class="text-center border-b-2 border-slate-800 pb-4 mb-6">
-                            <h1 class="text-2xl font-black text-slate-900 tracking-wider">CONSTANCIA DE PAGO DE ALQUILER</h1>
-                            <h2 class="text-lg font-bold text-slate-700 mt-1">Centro Comercial Trivani</h2>
-                            <p class="text-sm font-semibold text-slate-600">Mes de <span id="pvMesHeader">Octubre 2026</span></p>
+                        <!-- Encabezado Estilo Banner -->
+                        <div class="text-center pb-4 mb-6 border-b-2 border-teal-700">
+                            <h1 id="pvTituloHeader" class="text-xl font-extrabold text-teal-800 tracking-wide uppercase">CONSTANCIA DE PAGO — SERVICIO DE LUZ</h1>
+                            <p class="text-xs font-semibold text-slate-500 mt-1">Centro Comercial Trivani — Mes de <span id="pvMesHeader">Octubre 2026</span></p>
                         </div>
 
-                        <!-- Texto Descriptivo -->
-                        <p class="text-xs text-justify leading-relaxed mb-6">
-                            Por medio del presente documento, se deja constancia formal de la recepción del pago por concepto de alquiler correspondiente al mes de <strong id="pvMesCuerpo">Octubre de 2026</strong> por el uso comercial de un local dentro del <strong id="pvUbicacionCuerpo">Centro Comercial Trivani</strong>.
+                        <!-- Texto Descriptivo Formato Original -->
+                        <p class="text-xs text-slate-600 text-justify leading-relaxed mb-6">
+                            Por medio del presente documento, se deja constancia formal de la recepción del pago por concepto del <strong id="pvTextoConcepto">"servicio de energía eléctrica (luz)"</strong> correspondiente al mes de <strong id="pvMesCuerpo">Octubre de 2026</strong> por el uso del local comercial dentro del <strong id="pvUbicacionCuerpo">Centro Comercial Trivani</strong>.
                         </p>
 
                         <!-- Bloque Monto -->
-                        <div class="bg-slate-50 border border-slate-300 rounded-lg p-4 text-center mb-6">
-                            <span class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">MONTO TOTAL PAGADO</span>
-                            <span class="text-3xl font-black text-slate-900">S/<span id="pvMonto">800.00</span></span>
-                            <p class="text-xs font-semibold text-slate-700 mt-1">Son: <span id="pvMontoLetras">Ochocientos y 00/100 Soles</span></p>
+                        <div class="bg-slate-50 border border-slate-200 rounded-md p-4 text-center mb-6">
+                            <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">MONTO TOTAL PAGADO</span>
+                            <span class="text-2xl font-black text-slate-900">S/ <span id="pvMonto">93.60</span></span>
+                            <p class="text-xs font-medium text-slate-500 mt-1">Son: <span id="pvMontoLetras">Noventa y tres y 60/100 Soles</span></p>
                         </div>
 
-                        <!-- Información de las Partes -->
+                        <!-- Información de las Partes (Formato Líneas Horizontales) -->
                         <div class="mb-6">
-                            <h3 class="text-xs font-bold uppercase text-slate-900 border-b border-slate-300 pb-1 mb-2">INFORMACIÓN DE LAS PARTES</h3>
-                            <div class="grid grid-cols-2 gap-4 text-xs">
-                                <div class="bg-slate-50 p-3 rounded border border-slate-200">
-                                    <span class="block font-semibold text-slate-500 mb-1">Inquilino / Depositante:</span>
-                                    <strong id="pvInqNombre" class="block font-bold text-slate-900">ESFRAIN CRUZ LLANOS</strong>
-                                    <span class="block text-slate-600 mt-1">DNI Depositante: <span id="pvInqDni">47373742</span></span>
+                            <h3 class="text-xs font-bold uppercase text-teal-800 mb-2">INFORMACIÓN DE LAS PARTES</h3>
+                            <div class="border-t border-slate-200 divide-y divide-slate-200 text-xs">
+                                <div class="py-2 flex">
+                                    <span class="w-1/3 font-semibold text-slate-600">Inquilino / Depositante:</span>
+                                    <strong id="pvInqNombre" class="w-2/3 font-bold text-slate-900">ESFRAIN CRUZ LLANOS</strong>
                                 </div>
-                                <div class="bg-slate-50 p-3 rounded border border-slate-200">
-                                    <span class="block font-semibold text-slate-500 mb-1">Arrendador / Beneficiario:</span>
-                                    <strong class="block font-bold text-slate-900">VÍCTOR ALMIRÓN PINCHI</strong>
-                                    <span class="block text-slate-600 mt-1">DNI Arrendador: <span>42897193</span></span>
+                                <div class="py-2 flex">
+                                    <span class="w-1/3 font-semibold text-slate-600">DNI Depositante:</span>
+                                    <span id="pvInqDni" class="w-2/3 text-slate-800 font-medium">47373742</span>
+                                </div>
+                                <div class="py-2 flex">
+                                    <span class="w-1/3 font-semibold text-slate-600">Arrendador / Beneficiario:</span>
+                                    <strong class="w-2/3 font-bold text-slate-900">VÍCTOR ALMIRÓN PINCHI</strong>
+                                </div>
+                                <div class="py-2 flex">
+                                    <span class="w-1/3 font-semibold text-slate-600">DNI Arrendador:</span>
+                                    <span class="w-2/3 text-slate-800 font-medium">42897193</span>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Detalles del Arrendamiento -->
+                        <!-- Detalles del Servicio y Pago (Formato Líneas Horizontales) -->
                         <div class="mb-6">
-                            <h3 class="text-xs font-bold uppercase text-slate-900 border-b border-slate-300 pb-1 mb-2">DETALLES DEL ARRENDAMIENTO Y PAGO</h3>
-                            <div class="space-y-1.5 text-xs">
-                                <div class="flex justify-between border-b border-slate-100 pb-1">
-                                    <span class="font-semibold text-slate-600">Concepto:</span>
-                                    <span id="pvConcepto" class="font-bold text-slate-800">Alquiler de Local Comercial</span>
+                            <h3 class="text-xs font-bold uppercase text-teal-800 mb-2">DETALLES DEL SERVICIO Y PAGO</h3>
+                            <div class="border-t border-slate-200 divide-y divide-slate-200 text-xs">
+                                <div class="py-2 flex">
+                                    <span class="w-1/3 font-semibold text-slate-600">Concepto:</span>
+                                    <span id="pvConcepto" class="w-2/3 font-medium text-slate-800">Pago de Servicio de Energía Eléctrica (Luz)</span>
                                 </div>
-                                <div class="flex justify-between border-b border-slate-100 pb-1">
-                                    <span class="font-semibold text-slate-600">Periodo / Mes:</span>
-                                    <span id="pvPeriodo" class="font-bold text-slate-800">Octubre 2026</span>
+                                <div class="py-2 flex">
+                                    <span class="w-1/3 font-semibold text-slate-600">Periodo / Mes:</span>
+                                    <span id="pvPeriodo" class="w-2/3 font-medium text-slate-800">Octubre 2026</span>
                                 </div>
-                                <div class="flex justify-between border-b border-slate-100 pb-1">
-                                    <span class="font-semibold text-slate-600">Ubicación / Inmueble:</span>
-                                    <span id="pvUbicacion" class="font-bold text-slate-800">Centro Comercial Trivani</span>
+                                <div class="py-2 flex">
+                                    <span class="w-1/3 font-semibold text-slate-600">Ubicación / Inmueble:</span>
+                                    <span id="pvUbicacion" class="w-2/3 font-medium text-slate-800">Centro Comercial Trivani</span>
                                 </div>
-                                <div class="flex justify-between border-b border-slate-100 pb-1">
-                                    <span class="font-semibold text-slate-600">Banco / Cuenta Destino:</span>
-                                    <span id="pvBanco" class="font-bold text-slate-800">Banco de la Nación (Cta. 04-227-354750)</span>
+                                <div class="py-2 flex">
+                                    <span class="w-1/3 font-semibold text-slate-600">Banco / Cuenta Destino:</span>
+                                    <span id="pvBanco" class="w-2/3 font-medium text-slate-800">Banco de la Nación (Cta. 04-227-354750)</span>
                                 </div>
-                                <div class="flex justify-between border-b border-slate-100 pb-1">
-                                    <span class="font-semibold text-slate-600">Fecha de Operación:</span>
-                                    <span id="pvFecha" class="font-bold text-slate-800">02 de Octubre de 2026</span>
+                                <div class="py-2 flex">
+                                    <span class="w-1/3 font-semibold text-slate-600">Fecha de Operación:</span>
+                                    <span id="pvFecha" class="w-2/3 font-medium text-slate-800">02 de Octubre de 2026</span>
                                 </div>
                             </div>
                         </div>
 
-                        <p class="text-[10px] text-slate-500 italic bg-slate-50 p-2 rounded border border-slate-200">
-                            Nota: Este documento acredita la recepción conforme del pago de la renta del local comercial correspondiente al periodo indicado, sirviendo como comprobante administrativo para ambas partes.
+                        <p id="pvNotaPie" class="text-[10px] text-slate-400 italic bg-slate-50 p-2 rounded border border-slate-100">
+                            Nota: Este documento acredita la recepción conforme del pago correspondiente al consumo de energía eléctrica del local comercial para el periodo indicado, sirviendo como comprobante administrativo para ambas partes.
                         </p>
                     </div>
 
-                    <!-- Pie y Firma (Arrendador Fijo) -->
-                    <div class="mt-12 pt-6 border-t border-slate-300">
+                    <!-- Pie y Firma -->
+                    <div class="mt-12 pt-6">
                         <div class="text-center w-1/2 mx-auto">
                             <div class="border-b border-slate-400 w-3/4 mx-auto mb-2"></div>
                             <p class="text-xs font-bold text-slate-900">VÍCTOR ALMIRÓN PINCHI</p>
@@ -206,7 +224,7 @@
                         </div>
 
                         <div class="flex justify-between items-center text-[10px] text-slate-400 mt-8 border-t border-slate-100 pt-2">
-                            <span>Centro Comercial Trivani Comprobante de Pago</span>
+                            <span id="pvFooterDoc">Centro Comercial Trivani — Comprobante Servicio de Luz</span>
                             <span>Página 1 de 1</span>
                         </div>
                     </div>
@@ -218,6 +236,43 @@
     </div>
 
     <script>
+        function cambiarTipoComprobante() {
+            const select = document.getElementById('tipoComprobante').value;
+            const titulo = document.getElementById('pvTituloHeader');
+            const conceptoInput = document.getElementById('conceptoInput');
+            const textoConcepto = document.getElementById('pvTextoConcepto');
+            const notaPie = document.getElementById('pvNotaPie');
+            const footerDoc = document.getElementById('pvFooterDoc');
+
+            if (select === 'SERVICIO DE LUZ') {
+                titulo.innerText = 'CONSTANCIA DE PAGO — SERVICIO DE LUZ';
+                conceptoInput.value = 'Pago de Servicio de Energía Eléctrica (Luz)';
+                textoConcepto.innerText = '"servicio de energía eléctrica (luz)"';
+                notaPie.innerText = 'Nota: Este documento acredita la recepción conforme del pago correspondiente al consumo de energía eléctrica del local comercial para el periodo indicado, sirviendo como comprobante administrativo para ambas partes.';
+                footerDoc.innerText = 'Centro Comercial Trivani — Comprobante Servicio de Luz';
+            } else if (select === 'ALQUILER DE LOCAL') {
+                titulo.innerText = 'CONSTANCIA DE PAGO DE ALQUILER';
+                conceptoInput.value = 'Alquiler de Local Comercial';
+                textoConcepto.innerText = 'alquiler';
+                notaPie.innerText = 'Nota: Este documento acredita la recepción conforme del pago de la renta del local comercial correspondiente al periodo indicado, sirviendo como comprobante administrativo para ambas partes.';
+                footerDoc.innerText = 'Centro Comercial Trivani Comprobante de Pago';
+            } else if (select === 'SERVICIO DE AGUA') {
+                titulo.innerText = 'CONSTANCIA DE PAGO — SERVICIO DE AGUA';
+                conceptoInput.value = 'Pago de Servicio de Agua Potable';
+                textoConcepto.innerText = '"servicio de agua potable"';
+                notaPie.innerText = 'Nota: Este documento acredita la recepción conforme del pago correspondiente al consumo de agua del local comercial para el periodo indicado, sirviendo como comprobante administrativo para ambas partes.';
+                footerDoc.innerText = 'Centro Comercial Trivani — Comprobante Servicio de Agua';
+            } else if (select === 'MANTENIMIENTO') {
+                titulo.innerText = 'CONSTANCIA DE PAGO — MANTENIMIENTO';
+                conceptoInput.value = 'Mantenimiento General de Local Comercial';
+                textoConcepto.innerText = '"mantenimiento general"';
+                notaPie.innerText = 'Nota: Este documento acredita la recepción conforme del pago por mantenimiento correspondiente al periodo indicado, sirviendo como comprobante administrativo para ambas partes.';
+                footerDoc.innerText = 'Centro Comercial Trivani — Comprobante Mantenimiento';
+            }
+
+            actualizarPreview();
+        }
+
         function actualizarPreview() {
             // Inquilino
             document.getElementById('pvInqNombre').innerText = document.getElementById('inqNombre').value;

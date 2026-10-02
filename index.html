@@ -41,7 +41,7 @@
                 </div>
             </div>
             <span class="text-xs font-semibold px-3 py-1 rounded-full bg-blue-500/20 text-blue-300 border border-blue-500/30">
-                <i class="fa-solid fa-shield-halved mr-1"></i> Protección Anti-Suplantación Active
+                <i class="fa-solid fa-shield-halved mr-1"></i> Protección Anti-Suplantación Activa
             </span>
         </div>
     </nav>
@@ -49,11 +49,11 @@
     <div class="max-w-7xl mx-auto px-4 py-8">
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
             
-            <!-- FORMULARIO DE EDICIÓN COMPLETA -->
+            <!-- FORMULARIO DE EDICIÓN -->
             <div class="lg:col-span-5 bg-white p-6 rounded-2xl shadow-md border border-slate-200 space-y-4">
                 <div class="border-b pb-3">
                     <h2 class="font-bold text-lg text-slate-800">Editar Datos del Comprobante</h2>
-                    <p class="text-xs text-slate-500">Modifica cualquier campo y la vista previa se actualizará en tiempo real</p>
+                    <p class="text-xs text-slate-500">Modifica los campos necesarios para actualizar la vista previa</p>
                 </div>
 
                 <div class="space-y-3">
@@ -68,20 +68,6 @@
                         <div>
                             <label class="block text-xs font-bold text-slate-600 mb-1">DNI Inquilino</label>
                             <input type="text" id="inqDni" value="47373742" oninput="actualizarPreview()" class="w-full p-2 bg-slate-50 border rounded-lg text-xs font-semibold focus:ring-2 focus:ring-blue-500">
-                        </div>
-                    </div>
-
-                    <div class="border-b pb-2 pt-2">
-                        <span class="text-xs font-black text-blue-600 uppercase tracking-wider">Datos del Arrendador</span>
-                    </div>
-                    <div class="grid grid-cols-2 gap-3">
-                        <div>
-                            <label class="block text-xs font-bold text-slate-600 mb-1">Nombre Arrendador</label>
-                            <input type="text" id="arrNombre" value="VÍCTOR ALMIRÓN PINCHI" oninput="actualizarPreview()" class="w-full p-2 bg-slate-50 border rounded-lg text-xs font-semibold focus:ring-2 focus:ring-blue-500">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-600 mb-1">DNI Arrendador</label>
-                            <input type="text" id="arrDni" value="42897193" oninput="actualizarPreview()" class="w-full p-2 bg-slate-50 border rounded-lg text-xs font-semibold focus:ring-2 focus:ring-blue-500">
                         </div>
                     </div>
 
@@ -172,8 +158,8 @@
                                 </div>
                                 <div class="bg-slate-50 p-3 rounded border border-slate-200">
                                     <span class="block font-semibold text-slate-500 mb-1">Arrendador / Beneficiario:</span>
-                                    <strong id="pvArrNombre" class="block font-bold text-slate-900">VÍCTOR ALMIRÓN PINCHI</strong>
-                                    <span class="block text-slate-600 mt-1">DNI Arrendador: <span id="pvArrDni">42897193</span></span>
+                                    <strong class="block font-bold text-slate-900">VÍCTOR ALMIRÓN PINCHI</strong>
+                                    <span class="block text-slate-600 mt-1">DNI Arrendador: <span>42897193</span></span>
                                 </div>
                             </div>
                         </div>
@@ -210,12 +196,12 @@
                         </p>
                     </div>
 
-                    <!-- Pie y Firma -->
+                    <!-- Pie y Firma (Arrendador Fijo) -->
                     <div class="mt-12 pt-6 border-t border-slate-300">
                         <div class="text-center w-1/2 mx-auto">
                             <div class="border-b border-slate-400 w-3/4 mx-auto mb-2"></div>
-                            <p id="pvFirmaArrNombre" class="text-xs font-bold text-slate-900">VÍCTOR ALMIRÓN PINCHI</p>
-                            <p class="text-[10px] text-slate-500">DNI: <span id="pvFirmaArrDni">42897193</span></p>
+                            <p class="text-xs font-bold text-slate-900">VÍCTOR ALMIRÓN PINCHI</p>
+                            <p class="text-[10px] text-slate-500">DNI: 42897193</p>
                             <p class="text-[10px] font-semibold text-slate-600">Arrendador / Beneficiario</p>
                         </div>
 
@@ -236,14 +222,6 @@
             // Inquilino
             document.getElementById('pvInqNombre').innerText = document.getElementById('inqNombre').value;
             document.getElementById('pvInqDni').innerText = document.getElementById('inqDni').value;
-
-            // Arrendador
-            const arrNom = document.getElementById('arrNombre').value;
-            const arrDni = document.getElementById('arrDni').value;
-            document.getElementById('pvArrNombre').innerText = arrNom;
-            document.getElementById('pvArrDni').innerText = arrDni;
-            document.getElementById('pvFirmaArrNombre').innerText = arrNom;
-            document.getElementById('pvFirmaArrDni').innerText = arrDni;
 
             // Montos
             const montoVal = parseFloat(document.getElementById('montoInput').value) || 0;

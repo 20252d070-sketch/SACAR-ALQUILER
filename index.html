@@ -23,8 +23,13 @@
             z-index: 10;
         }
 
-        /* CONFIGURACIÓN DE IMPRESIÓN PARA QUE SOLO SALGA EL COMPROBANTE */
+        /* AJUSTES EXACTOS PARA IMPRESIÓN (PDF / IMPRESORA) */
         @media print {
+            body {
+                background: white !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
             body * {
                 visibility: hidden;
             }
@@ -35,11 +40,20 @@
                 position: absolute;
                 left: 0;
                 top: 0;
-                width: 100%;
-                margin: 0;
-                padding: 20px;
-                border: none;
-                box-shadow: none;
+                width: 100% !important;
+                min-height: 100vh !important;
+                margin: 0 !important;
+                padding: 15mm 20mm !important;
+                border: none !important;
+                box-shadow: none !important;
+                display: flex !important;
+                flex-direction: column !important;
+                justify-content: space-between !important;
+            }
+            /* Evita que la sección de la firma o pie de página se corte */
+            .firma-section {
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
             }
         }
     </style>
@@ -139,11 +153,11 @@
                     <div class="grid grid-cols-2 gap-3">
                         <div>
                             <label class="block text-xs font-bold text-slate-600 mb-1">Periodo / Mes</label>
-                            <input type="text" id="periodoInput" value="Octubre 2026" oninput="actualizarPreview()" class="w-full p-2 border rounded-lg text-xs focus:ring-2 focus:ring-teal-500">
+                            <input type="text" id="periodoInput" value="" oninput="actualizarPreview()" class="w-full p-2 border rounded-lg text-xs focus:ring-2 focus:ring-teal-500">
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-slate-600 mb-1">Fecha de Operación</label>
-                            <input type="text" id="fechaInput" value="02 de Octubre de 2026" oninput="actualizarPreview()" class="w-full p-2 border rounded-lg text-xs focus:ring-2 focus:ring-teal-500">
+                            <input type="text" id="fechaInput" value="" oninput="actualizarPreview()" class="w-full p-2 border rounded-lg text-xs focus:ring-2 focus:ring-teal-500">
                         </div>
                     </div>
 
@@ -175,11 +189,11 @@
                     <div>
                         <div class="text-center pb-4 mb-6 border-b-2 border-teal-700">
                             <h1 id="pvTituloHeader" class="text-xl font-extrabold text-teal-800 tracking-wide uppercase">CONSTANCIA DE PAGO — SERVICIO DE LUZ</h1>
-                            <p class="text-xs font-semibold text-slate-500 mt-1">Centro Comercial Trivani — Mes de <span id="pvMesHeader">Octubre 2026</span></p>
+                            <p class="text-xs font-semibold text-slate-500 mt-1">Centro Comercial Trivani — Mes de <span id="pvMesHeader"></span></p>
                         </div>
 
                         <p class="text-xs text-slate-600 text-justify leading-relaxed mb-6">
-                            Por medio del presente documento, se deja constancia formal de la recepción del pago por concepto del <strong id="pvTextoConcepto">"servicio de energía eléctrica (luz)"</strong> correspondiente al mes de <strong id="pvMesCuerpo">Octubre de 2026</strong> por el uso del local comercial dentro del <strong id="pvUbicacionCuerpo">Centro Comercial Trivani</strong>.
+                            Por medio del presente documento, se deja constancia formal de la recepción del pago por concepto del <strong id="pvTextoConcepto">"servicio de energía eléctrica (luz)"</strong> correspondiente al mes de <strong id="pvMesCuerpo"></strong> por el uso del local comercial dentro del <strong id="pvUbicacionCuerpo">Centro Comercial Trivani</strong>.
                         </p>
 
                         <div class="bg-slate-50 border border-slate-200 rounded-md p-4 text-center mb-6">
@@ -219,7 +233,7 @@
                                 </div>
                                 <div class="py-2 flex">
                                     <span class="w-1/3 font-semibold text-slate-600">Periodo / Mes:</span>
-                                    <span id="pvPeriodo" class="w-2/3 font-medium text-slate-800">Octubre 2026</span>
+                                    <span id="pvPeriodo" class="w-2/3 font-medium text-slate-800"></span>
                                 </div>
                                 <div class="py-2 flex">
                                     <span class="w-1/3 font-semibold text-slate-600">Ubicación / Inmueble:</span>
@@ -231,7 +245,7 @@
                                 </div>
                                 <div class="py-2 flex">
                                     <span class="w-1/3 font-semibold text-slate-600">Fecha de Operación:</span>
-                                    <span id="pvFecha" class="w-2/3 font-medium text-slate-800">02 de Octubre de 2026</span>
+                                    <span id="pvFecha" class="w-2/3 font-medium text-slate-800"></span>
                                 </div>
                             </div>
                         </div>
@@ -241,7 +255,8 @@
                         </p>
                     </div>
 
-                    <div class="mt-12 pt-6">
+                    <!-- SECCIÓN DE LA FIRMA (PROTEGIDA PARA IMPRESIÓN) -->
+                    <div class="firma-section mt-12 pt-6">
                         <div class="text-center w-1/2 mx-auto">
                             <div class="border-b border-slate-400 w-3/4 mx-auto mb-2"></div>
                             <p class="text-xs font-bold text-slate-900">VÍCTOR ALMIRÓN PINCHI</p>
@@ -368,6 +383,24 @@
     </script>
 
     <script>
+        // CONFIGURACIÓN AUTOMÁTICA DE FECHA ACTUAL AL CARGAR LA PÁGINA
+        document.addEventListener('DOMContentLoaded', function() {
+            const hoy = new Date();
+            const meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+            
+            const dia = String(hoy.getDate()).padStart(2, '0');
+            const mesNombre = meses[hoy.getMonth()];
+            const anio = hoy.getFullYear();
+
+            const fechaFormateada = `${dia} de ${mesNombre} de ${anio}`;
+            const periodoFormateado = `${mesNombre} ${anio}`;
+
+            document.getElementById('fechaInput').value = fechaFormateada;
+            document.getElementById('periodoInput').value = periodoFormateado;
+
+            actualizarPreview();
+        });
+
         function cambiarTipoComprobante() {
             const select = document.getElementById('tipoComprobante').value;
             const titulo = document.getElementById('pvTituloHeader');

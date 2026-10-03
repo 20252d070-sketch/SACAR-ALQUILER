@@ -50,7 +50,7 @@
                 flex-direction: column !important;
                 justify-content: space-between !important;
             }
-            /* Evita que la sección de la firma o pie de página se corte */
+            /* Garantiza que la firma y pie de página no sufran cortes */
             .firma-section {
                 page-break-inside: avoid !important;
                 break-inside: avoid !important;
@@ -255,7 +255,7 @@
                         </p>
                     </div>
 
-                    <!-- SECCIÓN DE LA FIRMA (PROTEGIDA PARA IMPRESIÓN) -->
+                    <!-- SECCIÓN DE LA FIRMA -->
                     <div class="firma-section mt-12 pt-6">
                         <div class="text-center w-1/2 mx-auto">
                             <div class="border-b border-slate-400 w-3/4 mx-auto mb-2"></div>
@@ -310,7 +310,7 @@
 
     </div>
 
-    <!-- FIREBASE SDKS -->
+    <!-- FIREBASE SDKS Y LÓGICA DE LA NUBE -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, collection, addDoc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
@@ -328,10 +328,11 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // LEER HISTORIAL EN TIEMPO REAL
+        // LEER HISTORIAL EN TIEMPO REAL DESDE LA NUBE
         const q = query(collection(db, "pagos_trivani"), orderBy("registroNube", "desc"));
         onSnapshot(q, (snapshot) => {
             const tabla = document.getElementById('tablaHistorial');
+            if (!tabla) return;
             tabla.innerHTML = '';
 
             if (snapshot.empty) {
@@ -355,10 +356,13 @@
             });
         }, (error) => {
             console.error("Error al leer Firestore:", error);
-            document.getElementById('tablaHistorial').innerHTML = '<tr><td colspan="6" class="p-4 text-center text-red-500 font-bold">Error de permisos en Firebase. Revisa las reglas de lectura/escritura en la consola.</td></tr>';
+            const tabla = document.getElementById('tablaHistorial');
+            if (tabla) {
+                tabla.innerHTML = '<tr><td colspan="6" class="p-4 text-center text-red-500 font-bold">Error de permisos en Firebase. Revisa las reglas en la consola.</td></tr>';
+            }
         });
 
-        // GUARDAR PAGO EN LA NUBE E IMPRIMIR
+        // GUARDAR EN LA NUBE E IMPRIMIR
         window.guardarEImprimir = async function() {
             const datosPago = {
                 tipoComprobante: document.getElementById('tipoComprobante').value,
@@ -382,8 +386,9 @@
         };
     </script>
 
+    <!-- LÓGICA DE INTERFAZ, VISTA PREVIA Y FECHA AUTOMÁTICA -->
     <script>
-        // CONFIGURACIÓN AUTOMÁTICA DE FECHA ACTUAL AL CARGAR LA PÁGINA
+        // CARGAR FECHA ACTUAL AUTOMÁTICAMENTE AL ABRIR LA PÁGINA
         document.addEventListener('DOMContentLoaded', function() {
             const hoy = new Date();
             const meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
@@ -395,8 +400,11 @@
             const fechaFormateada = `${dia} de ${mesNombre} de ${anio}`;
             const periodoFormateado = `${mesNombre} ${anio}`;
 
-            document.getElementById('fechaInput').value = fechaFormateada;
-            document.getElementById('periodoInput').value = periodoFormateado;
+            const inputFecha = document.getElementById('fechaInput');
+            const inputPeriodo = document.getElementById('periodoInput');
+
+            if (inputFecha) inputFecha.value = fechaFormateada;
+            if (inputPeriodo) inputPeriodo.value = periodoFormateado;
 
             actualizarPreview();
         });
@@ -410,54 +418,64 @@
             const footerDoc = document.getElementById('pvFooterDoc');
 
             if (select === 'SERVICIO DE LUZ') {
-                titulo.innerText = 'CONSTANCIA DE PAGO — SERVICIO DE LUZ';
-                conceptoInput.value = 'Pago de Servicio de Energía Eléctrica (Luz)';
-                textoConcepto.innerText = '"servicio de energía eléctrica (luz)"';
-                notaPie.innerText = 'Nota: Este documento acredita la recepción conforme del pago correspondiente al consumo de energía eléctrica del local comercial para el periodo indicado, sirviendo como comprobante administrativo para ambas partes.';
-                footerDoc.innerText = 'Centro Comercial Trivani — Comprobante Servicio de Luz';
+                if (titulo) titulo.innerText = 'CONSTANCIA DE PAGO — SERVICIO DE LUZ';
+                if (conceptoInput) conceptoInput.value = 'Pago de Servicio de Energía Eléctrica (Luz)';
+                if (textoConcepto) textoConcepto.innerText = '"servicio de energía eléctrica (luz)"';
+                if (notaPie) notaPie.innerText = 'Nota: Este documento acredita la recepción conforme del pago correspondiente al consumo de energía eléctrica del local comercial para el periodo indicado, sirviendo como comprobante administrativo para ambas partes.';
+                if (footerDoc) footerDoc.innerText = 'Centro Comercial Trivani — Comprobante Servicio de Luz';
             } else if (select === 'ALQUILER DE LOCAL') {
-                titulo.innerText = 'CONSTANCIA DE PAGO DE ALQUILER';
-                conceptoInput.value = 'Alquiler de Local Comercial';
-                textoConcepto.innerText = 'alquiler';
-                notaPie.innerText = 'Nota: Este documento acredita la recepción conforme del pago de la renta del local comercial correspondiente al periodo indicado, sirviendo como comprobante administrativo para ambas partes.';
-                footerDoc.innerText = 'Centro Comercial Trivani Comprobante de Pago';
+                if (titulo) titulo.innerText = 'CONSTANCIA DE PAGO DE ALQUILER';
+                if (conceptoInput) conceptoInput.value = 'Alquiler de Local Comercial';
+                if (textoConcepto) textoConcepto.innerText = 'alquiler';
+                if (notaPie) notaPie.innerText = 'Nota: Este documento acredita la recepción conforme del pago de la renta del local comercial correspondiente al periodo indicado, sirviendo como comprobante administrativo para ambas partes.';
+                if (footerDoc) footerDoc.innerText = 'Centro Comercial Trivani Comprobante de Pago';
             } else if (select === 'SERVICIO DE AGUA') {
-                titulo.innerText = 'CONSTANCIA DE PAGO — SERVICIO DE AGUA';
-                conceptoInput.value = 'Pago de Servicio de Agua Potable';
-                textoConcepto.innerText = '"servicio de agua potable"';
-                notaPie.innerText = 'Nota: Este documento acredita la recepción conforme del pago correspondiente al consumo de agua del local comercial para el periodo indicado, sirviendo como comprobante administrativo para ambas partes.';
-                footerDoc.innerText = 'Centro Comercial Trivani — Comprobante Servicio de Agua';
+                if (titulo) titulo.innerText = 'CONSTANCIA DE PAGO — SERVICIO DE AGUA';
+                if (conceptoInput) conceptoInput.value = 'Pago de Servicio de Agua Potable';
+                if (textoConcepto) textoConcepto.innerText = '"servicio de agua potable"';
+                if (notaPie) notaPie.innerText = 'Nota: Este documento acredita la recepción conforme del pago correspondiente al consumo de agua del local comercial para el periodo indicado, sirviendo como comprobante administrativo para ambas partes.';
+                if (footerDoc) footerDoc.innerText = 'Centro Comercial Trivani — Comprobante Servicio de Agua';
             } else if (select === 'MANTENIMIENTO') {
-                titulo.innerText = 'CONSTANCIA DE PAGO — MANTENIMIENTO';
-                conceptoInput.value = 'Mantenimiento General de Local Comercial';
-                textoConcepto.innerText = '"mantenimiento general"';
-                notaPie.innerText = 'Nota: Este documento acredita la recepción conforme del pago por mantenimiento correspondiente al periodo indicado, sirviendo como comprobante administrativo para ambas partes.';
-                footerDoc.innerText = 'Centro Comercial Trivani — Comprobante Mantenimiento';
+                if (titulo) titulo.innerText = 'CONSTANCIA DE PAGO — MANTENIMIENTO';
+                if (conceptoInput) conceptoInput.value = 'Mantenimiento General de Local Comercial';
+                if (textoConcepto) textoConcepto.innerText = '"mantenimiento general"';
+                if (notaPie) notaPie.innerText = 'Nota: Este documento acredita la recepción conforme del pago por mantenimiento correspondiente al periodo indicado, sirviendo como comprobante administrativo para ambas partes.';
+                if (footerDoc) footerDoc.innerText = 'Centro Comercial Trivani — Comprobante Mantenimiento';
             }
 
             actualizarPreview();
         }
 
         function actualizarPreview() {
-            document.getElementById('pvInqNombre').innerText = document.getElementById('inqNombre').value;
-            document.getElementById('pvInqDni').innerText = document.getElementById('inqDni').value;
+            const setVal = (id, val) => {
+                const el = document.getElementById(id);
+                if (el) el.innerText = val;
+            };
 
-            const montoVal = parseFloat(document.getElementById('montoInput').value) || 0;
-            document.getElementById('pvMonto').innerText = montoVal.toFixed(2);
-            document.getElementById('pvMontoLetras').innerText = document.getElementById('montoLetrasInput').value;
+            const getVal = (id) => {
+                const el = document.getElementById(id);
+                return el ? el.value : '';
+            };
 
-            const periodo = document.getElementById('periodoInput').value;
-            document.getElementById('pvMesHeader').innerText = periodo;
-            document.getElementById('pvMesCuerpo').innerText = periodo;
-            document.getElementById('pvPeriodo').innerText = periodo;
+            setVal('pvInqNombre', getVal('inqNombre'));
+            setVal('pvInqDni', getVal('inqDni'));
 
-            const ubicacion = document.getElementById('ubicacionInput').value;
-            document.getElementById('pvUbicacionCuerpo').innerText = ubicacion;
-            document.getElementById('pvUbicacion').innerText = ubicacion;
+            const montoVal = parseFloat(getVal('montoInput')) || 0;
+            setVal('pvMonto', montoVal.toFixed(2));
+            setVal('pvMontoLetras', getVal('montoLetrasInput'));
 
-            document.getElementById('pvConcepto').innerText = document.getElementById('conceptoInput').value;
-            document.getElementById('pvBanco').innerText = document.getElementById('bancoInput').value;
-            document.getElementById('pvFecha').innerText = document.getElementById('fechaInput').value;
+            const periodo = getVal('periodoInput');
+            setVal('pvMesHeader', periodo);
+            setVal('pvMesCuerpo', periodo);
+            setVal('pvPeriodo', periodo);
+
+            const ubicacion = getVal('ubicacionInput');
+            setVal('pvUbicacionCuerpo', ubicacion);
+            setVal('pvUbicacion', ubicacion);
+
+            setVal('pvConcepto', getVal('conceptoInput'));
+            setVal('pvBanco', getVal('bancoInput'));
+            setVal('pvFecha', getVal('fechaInput'));
         }
 
         function descargarPDF() {

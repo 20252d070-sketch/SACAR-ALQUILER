@@ -1,1409 +1,1037 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>C.C. Trivani - Sistema de Pagos</title>
-
-    <!-- Tailwind -->
-    <script src="https://cdn.tailwindcss.com"></script>
-
-    <!-- Font Awesome -->
-    <link
-        rel="stylesheet"
-        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-    >
-
-    <!-- html2canvas -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-
-    <!-- jsPDF -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-
-    <style>
-
-        * {
-            box-sizing: border-box;
-        }
-
-        html {
-            scroll-behavior: smooth;
-        }
-
-        body {
-            margin: 0;
-            background:
-                radial-gradient(circle at top left, rgba(59,130,246,.12), transparent 30%),
-                radial-gradient(circle at top right, rgba(16,185,129,.10), transparent 30%),
-                #f1f5f9;
-            font-family: Arial, Helvetica, sans-serif;
-            color: #0f172a;
-        }
-
-        /* =========================================================
-           NAVBAR
-        ========================================================= */
-
-        .navbar {
-            background: linear-gradient(135deg, #0f172a, #1e3a8a);
-            color: white;
-            box-shadow: 0 8px 25px rgba(15,23,42,.18);
-        }
-
-        .brand-title {
-            font-size: 1.25rem;
-            font-weight: 900;
-            letter-spacing: .5px;
-        }
-
-        .brand-subtitle {
-            color: #bfdbfe;
-            font-size: .72rem;
-        }
-
-        /* =========================================================
-           CARDS
-        ========================================================= */
-
-        .glass-card {
-            background: rgba(255,255,255,.94);
-            border: 1px solid rgba(226,232,240,.9);
-            border-radius: 20px;
-            box-shadow: 0 12px 35px rgba(15,23,42,.08);
-        }
-
-        .summary-card {
-            transition: .2s ease;
-        }
-
-        .summary-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 18px 35px rgba(15,23,42,.12);
-        }
-
-        .summary-number {
-            font-size: 1.55rem;
-            font-weight: 900;
-        }
-
-        .summary-label {
-            font-size: .78rem;
-            color: #64748b;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: .3px;
-        }
-
-        /* =========================================================
-           FORM
-        ========================================================= */
-
-        .field-label {
-            display: block;
-            font-size: .8rem;
-            font-weight: 800;
-            color: #334155;
-            margin-bottom: 6px;
-        }
-
-        .input-control {
-            width: 100%;
-            border: 1px solid #cbd5e1;
-            background: white;
-            border-radius: 11px;
-            padding: 11px 13px;
-            outline: none;
-            transition: .18s ease;
-        }
-
-        .input-control:focus {
-            border-color: #2563eb;
-            box-shadow: 0 0 0 3px rgba(37,99,235,.12);
-        }
-
-        textarea.input-control {
-            resize: vertical;
-        }
-
-        .status-btn {
-            border: 2px solid #cbd5e1;
-            background: white;
-            border-radius: 11px;
-            padding: 10px 16px;
-            font-weight: 800;
-            cursor: pointer;
-            transition: .18s ease;
-        }
-
-        .status-btn:hover {
-            transform: translateY(-1px);
-        }
-
-        .status-btn.active-paid {
-            background: #dcfce7;
-            border-color: #22c55e;
-            color: #166534;
-        }
-
-        .status-btn.active-pending {
-            background: #fef3c7;
-            border-color: #f59e0b;
-            color: #92400e;
-        }
-
-        /* =========================================================
-           BUTTONS
-        ========================================================= */
-
-        .btn {
-            border: 0;
-            border-radius: 12px;
-            padding: 12px 16px;
-            font-weight: 900;
-            cursor: pointer;
-            transition: .18s ease;
-            display: inline-flex;
-            justify-content: center;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .btn:hover {
-            transform: translateY(-1px);
-        }
-
-        .btn:active {
-            transform: translateY(0);
-        }
-
-        .btn-primary {
-            background: #2563eb;
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background: #1d4ed8;
-        }
-
-        .btn-success {
-            background: #16a34a;
-            color: white;
-        }
-
-        .btn-success:hover {
-            background: #15803d;
-        }
-
-        .btn-warning {
-            background: #f59e0b;
-            color: white;
-        }
-
-        .btn-warning:hover {
-            background: #d97706;
-        }
-
-        .btn-dark {
-            background: #0f172a;
-            color: white;
-        }
-
-        .btn-dark:hover {
-            background: #020617;
-        }
-
-        .btn-danger {
-            background: #dc2626;
-            color: white;
-        }
-
-        .btn-danger:hover {
-            background: #b91c1c;
-        }
-
-        .btn-secondary {
-            background: #e2e8f0;
-            color: #334155;
-        }
-
-        /* =========================================================
-           RECEIPT / COMPROBANTE
-        ========================================================= */
-
-        /*
-            El comprobante mantiene proporción A4.
-            No usamos transform:scale() en impresión.
-        */
-
-        #receiptWrapper {
-            width: 100%;
-            display: flex;
-            justify-content: center;
-            overflow: visible;
-        }
-
-        #receiptPDF {
-            width: 210mm;
-            min-height: 297mm;
-            max-width: 210mm;
-            background: white;
-            padding: 11mm;
-            color: #111827;
-            box-shadow: 0 10px 35px rgba(15,23,42,.12);
-            overflow: hidden;
-        }
-
-        .receipt-header {
-            border-bottom: 3px solid #1d4ed8;
-            padding-bottom: 8px;
-            margin-bottom: 10px;
-        }
-
-        .receipt-title {
-            font-size: 21px;
-            font-weight: 900;
-            color: #1e3a8a;
-        }
-
-        .receipt-subtitle {
-            font-size: 10px;
-            color: #64748b;
-        }
-
-        .receipt-box {
-            border: 1px solid #cbd5e1;
-            border-radius: 8px;
-            overflow: hidden;
-            margin-bottom: 8px;
-        }
-
-        .receipt-box-title {
-            background: #eff6ff;
-            color: #1e3a8a;
-            font-size: 10px;
-            font-weight: 900;
-            padding: 6px 8px;
-            border-bottom: 1px solid #cbd5e1;
-        }
-
-        .receipt-row {
-            display: grid;
-            grid-template-columns: 42% 58%;
-            border-bottom: 1px solid #e2e8f0;
-            min-height: 25px;
-        }
-
-        .receipt-row:last-child {
-            border-bottom: 0;
-        }
-
-        .receipt-label {
-            background: #f8fafc;
-            padding: 5px 7px;
-            font-size: 9px;
-            font-weight: 800;
-            color: #475569;
-        }
-
-        .receipt-value {
-            padding: 5px 7px;
-            font-size: 9px;
-            font-weight: 700;
-            color: #111827;
-            word-break: break-word;
-        }
-
-        .receipt-total {
-            border: 2px solid #1d4ed8;
-            border-radius: 8px;
-            padding: 9px;
-            margin-top: 8px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .receipt-total-label {
-            font-size: 11px;
-            font-weight: 900;
-            color: #334155;
-        }
-
-        .receipt-total-value {
-            font-size: 18px;
-            font-weight: 900;
-            color: #1d4ed8;
-        }
-
-        .receipt-footer {
-            margin-top: 12px;
-            border-top: 1px solid #cbd5e1;
-            padding-top: 8px;
-            font-size: 8px;
-            color: #64748b;
-            line-height: 1.35;
-        }
-
-        .receipt-status {
-            display: inline-flex;
-            padding: 4px 9px;
-            border-radius: 999px;
-            font-size: 8px;
-            font-weight: 900;
-        }
-
-        .receipt-status.paid {
-            background: #dcfce7;
-            color: #166534;
-        }
-
-        .receipt-status.pending {
-            background: #fef3c7;
-            color: #92400e;
-        }
-
-        /* =========================================================
-           HISTORIAL
-        ========================================================= */
-
-        .history-card {
-            background: white;
-            border: 1px solid #e2e8f0;
-            border-radius: 17px;
-            padding: 16px;
-            transition: .18s ease;
-        }
-
-        .history-card:hover {
-            border-color: #93c5fd;
-            box-shadow: 0 10px 25px rgba(15,23,42,.08);
-        }
-
-        .status-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-            border-radius: 999px;
-            padding: 5px 9px;
-            font-size: .7rem;
-            font-weight: 900;
-        }
-
-        .badge-paid {
-            background: #dcfce7;
-            color: #166534;
-        }
-
-        .badge-pending {
-            background: #fef3c7;
-            color: #92400e;
-        }
-
-        .history-action {
-            border: 0;
-            border-radius: 9px;
-            padding: 8px 10px;
-            font-size: .75rem;
-            font-weight: 800;
-            cursor: pointer;
-            transition: .15s;
-        }
-
-        .history-action:hover {
-            transform: translateY(-1px);
-        }
-
-        /* =========================================================
-           TOAST
-        ========================================================= */
-
-        #toastContainer {
-            position: fixed;
-            right: 18px;
-            bottom: 18px;
-            z-index: 99999;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            max-width: 360px;
-        }
-
-        .toast {
-            color: white;
-            padding: 13px 15px;
-            border-radius: 13px;
-            box-shadow: 0 12px 30px rgba(15,23,42,.25);
-            font-size: .85rem;
-            font-weight: 700;
-            animation: toastIn .2s ease;
-        }
-
-        .toast-success {
-            background: #16a34a;
-        }
-
-        .toast-error {
-            background: #dc2626;
-        }
-
-        .toast-info {
-            background: #2563eb;
-        }
-
-        .toast-warning {
-            background: #d97706;
-        }
-
-        @keyframes toastIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        /* =========================================================
-           LOADING
-        ========================================================= */
-
-        .loading {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            padding: 30px;
-            color: #64748b;
-            font-weight: 700;
-        }
-
-        /* =========================================================
-           MOBILE
-        ========================================================= */
-
-        @media (max-width: 768px) {
-
-            #receiptWrapper {
-                overflow-x: auto;
-                justify-content: flex-start;
-                padding-bottom: 15px;
-            }
-
-            #receiptPDF {
-                flex-shrink: 0;
-                transform: scale(.55);
-                transform-origin: top left;
-                margin-right: -94mm;
-                margin-bottom: -133mm;
-            }
-
-            .receipt-title {
-                font-size: 18px;
-            }
-        }
-
-        /* =========================================================
-           IMPRESIÓN A4
-        ========================================================= */
-
-        @page {
-            size: A4 portrait;
-            margin: 0;
-        }
-
-        @media print {
-
-            html,
-            body {
-                width: 210mm !important;
-                height: 297mm !important;
-                margin: 0 !important;
-                padding: 0 !important;
-                background: white !important;
-                overflow: hidden !important;
-            }
-
-            body > * {
-                display: none !important;
-            }
-
-            #printArea {
-                display: block !important;
-                position: static !important;
-                width: 210mm !important;
-                height: 297mm !important;
-                margin: 0 !important;
-                padding: 0 !important;
-            }
-
-            #receiptWrapper {
-                display: block !important;
-                width: 210mm !important;
-                height: 297mm !important;
-                margin: 0 !important;
-                padding: 0 !important;
-                overflow: hidden !important;
-            }
-
-            #receiptPDF {
-                display: block !important;
-                position: relative !important;
-                width: 210mm !important;
-                height: 297mm !important;
-                min-height: 297mm !important;
-                max-width: none !important;
-                margin: 0 !important;
-                padding: 10mm !important;
-                box-shadow: none !important;
-                transform: none !important;
-                overflow: hidden !important;
-            }
-
-            /*
-                Oculta elementos de control del comprobante
-                que no deben salir impresos.
-            */
-            .no-print,
-            #toastContainer {
-                display: none !important;
-            }
-        }
-
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Centro Comercial Trivani - Sistema de Pagos</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+
+<link rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<style>
+
+* {
+    box-sizing: border-box;
+}
+
+html {
+    overflow-x: hidden;
+}
+
+body {
+    background:
+        radial-gradient(circle at top left, rgba(20,184,166,.08), transparent 30%),
+        #f1f5f9;
+}
+
+.watermark {
+    position:absolute;
+    top:50%;
+    left:50%;
+    transform:translate(-50%,-50%) rotate(-35deg);
+    font-size:2.8rem;
+    font-weight:900;
+    color:rgba(148,163,184,.10);
+    white-space:nowrap;
+    pointer-events:none;
+    z-index:0;
+}
+
+.receipt-content {
+    position:relative;
+    z-index:1;
+}
+
+.stat-card {
+    transition:.2s ease;
+}
+
+.stat-card:hover {
+    transform:translateY(-2px);
+}
+
+.history-card {
+    transition:.2s ease;
+}
+
+.history-card:hover {
+    transform:translateY(-2px);
+    box-shadow:0 12px 30px rgba(15,23,42,.10);
+}
+
+/* =========================================================
+   COMPROBANTE
+========================================================= */
+
+#receiptPDF {
+    width:210mm;
+    min-height:297mm;
+    max-width:none;
+}
+
+/* =========================================================
+   IMPRESIÓN A4
+========================================================= */
+
+@page {
+    size:A4 portrait;
+    margin:0;
+}
+
+@media print {
+
+    html,
+    body {
+        width:210mm!important;
+        height:297mm!important;
+        min-width:210mm!important;
+        margin:0!important;
+        padding:0!important;
+        background:#ffffff!important;
+        overflow:hidden!important;
+        -webkit-print-color-adjust:exact!important;
+        print-color-adjust:exact!important;
+    }
+
+    /*
+     * Ocultamos la aplicación completa durante la impresión.
+     * El comprobante se vuelve el único elemento imprimible.
+     */
+    body > *:not(#receiptPrintWrapper) {
+        display:none!important;
+    }
+
+    /*
+     * Contenedor de impresión creado por JS.
+     */
+    #receiptPrintWrapper {
+        display:block!important;
+        position:fixed!important;
+        inset:0!important;
+        width:210mm!important;
+        height:297mm!important;
+        margin:0!important;
+        padding:0!important;
+        background:#ffffff!important;
+        overflow:hidden!important;
+    }
+
+    #receiptPrintWrapper #receiptPDF {
+        display:flex!important;
+        position:absolute!important;
+
+        left:0!important;
+        top:0!important;
+
+        width:210mm!important;
+        height:297mm!important;
+        min-height:297mm!important;
+        max-height:297mm!important;
+
+        margin:0!important;
+        padding:10mm 12mm!important;
+
+        border:none!important;
+        border-radius:0!important;
+        box-shadow:none!important;
+
+        overflow:hidden!important;
+
+        transform:none!important;
+        transform-origin:top left!important;
+
+        font-size:10px!important;
+
+        background:#ffffff!important;
+    }
+
+    #receiptPrintWrapper #receiptPDF .watermark {
+        font-size:2rem!important;
+    }
+
+    #receiptPrintWrapper #receiptPDF h1 {
+        font-size:16px!important;
+    }
+
+    #receiptPrintWrapper #receiptPDF p {
+        line-height:1.3!important;
+    }
+
+    #receiptPrintWrapper #receiptPDF .mb-6 {
+        margin-bottom:10px!important;
+    }
+
+    #receiptPrintWrapper #receiptPDF .pb-4 {
+        padding-bottom:8px!important;
+    }
+
+    #receiptPrintWrapper #receiptPDF .p-4 {
+        padding:8px!important;
+    }
+
+    #receiptPrintWrapper #receiptPDF .py-2 {
+        padding-top:4px!important;
+        padding-bottom:4px!important;
+    }
+
+    #receiptPrintWrapper #receiptPDF .mt-12 {
+        margin-top:15px!important;
+    }
+
+    #receiptPrintWrapper #receiptPDF .pt-6 {
+        padding-top:8px!important;
+    }
+
+    #receiptPrintWrapper #receiptPDF .mt-8 {
+        margin-top:10px!important;
+    }
+
+    #receiptPrintWrapper #receiptPDF .text-2xl {
+        font-size:20px!important;
+    }
+
+    #receiptPrintWrapper #receiptPDF .firma-section {
+        break-inside:avoid!important;
+        page-break-inside:avoid!important;
+    }
+
+    #receiptPrintWrapper #receiptPDF * {
+        visibility:visible!important;
+    }
+}
+
+/* =========================================================
+   VISTA MÓVIL
+========================================================= */
+
+@media(max-width:768px) {
+
+    #receiptPDF {
+        transform:scale(.55);
+        transform-origin:top left;
+        margin-bottom:-130mm;
+    }
+}
+
+/*
+ * MUY IMPORTANTE:
+ * Nunca aplicar el escalado móvil mientras se imprime.
+ */
+@media(max-width:768px) and (min-width:1px) {
+
+    @media print {
+
+        #receiptPrintWrapper #receiptPDF {
+            transform:none!important;
+            margin-bottom:0!important;
+        }
+
+    }
+
+}
+
+</style>
 </head>
 
-<body>
+<body class="min-h-screen text-slate-800">
 
 <!-- =========================================================
      NAVBAR
 ========================================================= -->
 
-<header class="navbar">
-    <div class="max-w-7xl mx-auto px-4 py-4">
-        <div class="flex items-center justify-between gap-4">
+<nav class="bg-slate-950 text-white shadow-xl sticky top-0 z-50">
 
-            <div class="flex items-center gap-3">
+    <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
 
-                <div class="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center overflow-hidden">
-                    <img
-                        src="https://media.giphy.com/media/L1R1tvI9svkIWwpVYr/giphy.gif"
-                        alt="Trivani"
-                        class="w-full h-full object-cover"
-                        onerror="this.style.display='none'"
-                    >
-                </div>
+        <div class="flex items-center gap-3">
 
-                <div>
-                    <div class="brand-title">
-                        C.C. TRIVANI
-                    </div>
-
-                    <div class="brand-subtitle">
-                        Sistema Comercial de Pagos
-                    </div>
-                </div>
-
-            </div>
-
-            <div class="hidden sm:flex items-center gap-2 text-xs text-blue-100">
-                <i class="fa-solid fa-shield-halved"></i>
-                Gestión de comprobantes
-            </div>
-
-        </div>
-    </div>
-</header>
-
-
-<main class="max-w-7xl mx-auto px-4 py-6">
-
-    <!-- =====================================================
-         RESUMEN
-    ====================================================== -->
-
-    <section class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-
-        <div class="glass-card summary-card p-5">
-            <div class="flex justify-between items-start">
-                <div>
-                    <div class="summary-label">
-                        Registros
-                    </div>
-
-                    <div id="totalRegistros" class="summary-number mt-1">
-                        0
-                    </div>
-                </div>
-
-                <div class="w-11 h-11 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center">
-                    <i class="fa-solid fa-file-invoice"></i>
-                </div>
-            </div>
-        </div>
-
-
-        <div class="glass-card summary-card p-5">
-            <div class="flex justify-between items-start">
-                <div>
-                    <div class="summary-label">
-                        Pagado
-                    </div>
-
-                    <div id="totalPagado" class="summary-number mt-1 text-green-600">
-                        S/ 0.00
-                    </div>
-                </div>
-
-                <div class="w-11 h-11 rounded-xl bg-green-100 text-green-700 flex items-center justify-center">
-                    <i class="fa-solid fa-circle-check"></i>
-                </div>
-            </div>
-        </div>
-
-
-        <div class="glass-card summary-card p-5">
-            <div class="flex justify-between items-start">
-                <div>
-                    <div class="summary-label">
-                        Pendiente
-                    </div>
-
-                    <div id="totalPendiente" class="summary-number mt-1 text-amber-600">
-                        S/ 0.00
-                    </div>
-                </div>
-
-                <div class="w-11 h-11 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center">
-                    <i class="fa-solid fa-clock"></i>
-                </div>
-            </div>
-        </div>
-
-
-        <div class="glass-card summary-card p-5">
-            <div class="flex justify-between items-start">
-                <div>
-                    <div class="summary-label">
-                        Este mes
-                    </div>
-
-                    <div id="totalMes" class="summary-number mt-1 text-purple-600">
-                        S/ 0.00
-                    </div>
-                </div>
-
-                <div class="w-11 h-11 rounded-xl bg-purple-100 text-purple-700 flex items-center justify-center">
-                    <i class="fa-solid fa-calendar-days"></i>
-                </div>
-            </div>
-        </div>
-
-    </section>
-
-
-    <!-- =====================================================
-         FORMULARIO
-    ====================================================== -->
-
-    <section class="glass-card p-5 md:p-7 mb-6">
-
-        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-6">
+            <img
+                src="https://i.pinimg.com/originals/4b/06/e3/4b06e393fd0647c265b1282b0f006486.gif"
+                class="w-11 h-11 rounded-full border-2 border-teal-400"
+                alt="Robotín">
 
             <div>
-                <h1 class="text-xl md:text-2xl font-black text-slate-800">
-                    <i class="fa-solid fa-file-circle-plus text-blue-600 mr-2"></i>
-                    Registrar comprobante
+                <h1 class="font-black text-lg">
+                    C.C. TRIVANI
                 </h1>
 
-                <p class="text-sm text-slate-500 mt-1">
-                    Completa los datos para generar y guardar el comprobante.
-                </p>
-            </div>
-
-            <div class="text-xs text-slate-400">
-                C.C. Trivani
+                <span class="text-xs text-slate-400">
+                    Sistema Comercial de Pagos
+                </span>
             </div>
 
         </div>
 
+        <div class="flex items-center gap-2 text-xs text-teal-300">
 
-        <form id="paymentForm">
+            <span id="estadoFirebase">
+                <i class="fa-solid fa-cloud"></i>
+                Firebase
+            </span>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        </div>
 
-                <!-- TIPO -->
+    </div>
 
-                <div>
-                    <label class="field-label">
-                        Tipo de comprobante
-                    </label>
+</nav>
 
-                    <select id="tipoComprobante" class="input-control">
-                        <option value="RECIBO DE ALQUILER">
-                            Recibo de alquiler
-                        </option>
 
-                        <option value="COMPROBANTE DE SERVICIO DE LUZ">
-                            Comprobante de servicio de luz
-                        </option>
+<main class="max-w-7xl mx-auto px-4 py-7">
 
-                        <option value="RECIBO DE SERVICIO">
-                            Recibo de servicio
-                        </option>
-                    </select>
-                </div>
+<!-- =========================================================
+     RESUMEN
+========================================================= -->
 
+<section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-7">
 
-                <!-- INQUILINO -->
+    <div class="stat-card bg-white rounded-2xl border shadow-sm p-5">
 
-                <div>
-                    <label class="field-label">
-                        Nombre del inquilino
-                    </label>
-
-                    <input
-                        id="inquilino"
-                        class="input-control"
-                        type="text"
-                        placeholder="Nombre completo"
-                    >
-                </div>
-
-
-                <!-- DNI -->
-
-                <div>
-                    <label class="field-label">
-                        DNI
-                    </label>
-
-                    <input
-                        id="dniInquilino"
-                        class="input-control"
-                        type="text"
-                        maxlength="15"
-                        placeholder="DNI del inquilino"
-                    >
-                </div>
-
-
-                <!-- MONTO -->
-
-                <div>
-                    <label class="field-label">
-                        Monto
-                    </label>
-
-                    <div class="relative">
-                        <span class="absolute left-3 top-1/2 -translate-y-1/2 font-bold text-slate-500">
-                            S/
-                        </span>
-
-                        <input
-                            id="monto"
-                            class="input-control pl-10"
-                            type="number"
-                            min="0"
-                            step="0.01"
-                            placeholder="0.00"
-                        >
-                    </div>
-                </div>
-
-
-                <!-- MONTO LETRAS -->
-
-                <div class="md:col-span-2">
-                    <label class="field-label">
-                        Monto en letras
-                    </label>
-
-                    <input
-                        id="montoLetras"
-                        class="input-control"
-                        type="text"
-                        placeholder="Ejemplo: QUINIENTOS CON 00/100 SOLES"
-                    >
-                </div>
-
-
-                <!-- CONCEPTO -->
-
-                <div class="md:col-span-2">
-                    <label class="field-label">
-                        Concepto
-                    </label>
-
-                    <input
-                        id="concepto"
-                        class="input-control"
-                        type="text"
-                        placeholder="Ejemplo: Pago de alquiler"
-                    >
-                </div>
-
-
-                <!-- PERIODO -->
-
-                <div>
-                    <label class="field-label">
-                        Periodo
-                    </label>
-
-                    <input
-                        id="periodo"
-                        class="input-control"
-                        type="text"
-                        placeholder="Ejemplo: Octubre 2026"
-                    >
-                </div>
-
-
-                <!-- FECHA -->
-
-                <div>
-                    <label class="field-label">
-                        Fecha de operación
-                    </label>
-
-                    <input
-                        id="fechaOperacion"
-                        class="input-control"
-                        type="date"
-                    >
-                </div>
-
-
-                <!-- UBICACION -->
-
-                <div>
-                    <label class="field-label">
-                        Ubicación
-                    </label>
-
-                    <input
-                        id="ubicacion"
-                        class="input-control"
-                        type="text"
-                        value="Centro Comercial Trivani"
-                    >
-                </div>
-
-
-                <!-- BANCO -->
-
-                <div class="md:col-span-2">
-                    <label class="field-label">
-                        Cuenta / banco
-                    </label>
-
-                    <input
-                        id="banco"
-                        class="input-control"
-                        type="text"
-                        placeholder="Banco / número de cuenta"
-                    >
-                </div>
-
-
-                <!-- ESTADO -->
-
-                <div>
-
-                    <label class="field-label">
-                        Estado del pago
-                    </label>
-
-                    <div class="flex gap-2">
-
-                        <button
-                            type="button"
-                            id="btnPagado"
-                            class="status-btn active-paid flex-1"
-                            onclick="seleccionarEstado('pagado')"
-                        >
-                            <i class="fa-solid fa-check"></i>
-                            PAGADO
-                        </button>
-
-                        <button
-                            type="button"
-                            id="btnPendiente"
-                            class="status-btn flex-1"
-                            onclick="seleccionarEstado('pendiente')"
-                        >
-                            <i class="fa-solid fa-clock"></i>
-                            PENDIENTE
-                        </button>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-
-            <!-- BOTONES -->
-
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mt-7">
-
-                <button
-                    type="button"
-                    class="btn btn-primary"
-                    onclick="guardarComprobante()"
-                >
-                    <i class="fa-solid fa-floppy-disk"></i>
-                    Guardar + PDF
-                </button>
-
-
-                <button
-                    type="button"
-                    class="btn btn-success"
-                    onclick="crearEnlacePago()"
-                >
-                    <i class="fa-solid fa-link"></i>
-                    Generar enlace
-                </button>
-
-
-                <button
-                    type="button"
-                    class="btn btn-dark"
-                    onclick="imprimirA4()"
-                >
-                    <i class="fa-solid fa-print"></i>
-                    Imprimir A4
-                </button>
-
-
-                <button
-                    type="button"
-                    class="btn btn-secondary"
-                    onclick="limpiarFormulario()"
-                >
-                    <i class="fa-solid fa-rotate-left"></i>
-                    Limpiar
-                </button>
-
-            </div>
-
-
-            <!-- LINK DE PAGO -->
-
-            <div
-                id="paymentLinkBox"
-                class="hidden mt-5 p-4 rounded-xl bg-blue-50 border border-blue-200"
-            >
-
-                <div class="font-black text-blue-900 mb-2">
-                    <i class="fa-solid fa-link mr-1"></i>
-                    Enlace de pago
-                </div>
-
-                <div class="flex flex-col md:flex-row gap-2">
-
-                    <input
-                        id="paymentLinkInput"
-                        class="input-control flex-1"
-                        readonly
-                    >
-
-                    <button
-                        type="button"
-                        class="btn btn-primary"
-                        onclick="copiarEnlace()"
-                    >
-                        <i class="fa-solid fa-copy"></i>
-                        Copiar
-                    </button>
-
-                    <button
-                        type="button"
-                        class="btn btn-success"
-                        onclick="compartirWhatsApp()"
-                    >
-                        <i class="fa-brands fa-whatsapp"></i>
-                        WhatsApp
-                    </button>
-
-                </div>
-
-            </div>
-
-        </form>
-
-    </section>
-
-
-    <!-- =====================================================
-         PREVISUALIZACIÓN
-    ====================================================== -->
-
-    <section class="glass-card p-5 md:p-7 mb-6">
-
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-5">
+        <div class="flex justify-between">
 
             <div>
-                <h2 class="text-xl font-black text-slate-800">
-                    <i class="fa-solid fa-file-invoice text-blue-600 mr-2"></i>
-                    Vista previa
-                </h2>
+                <p class="text-xs font-bold text-slate-400 uppercase">
+                    Registros
+                </p>
 
-                <p class="text-sm text-slate-500">
-                    Así se generará el comprobante.
+                <p id="totalRegistros"
+                   class="text-3xl font-black mt-1">
+                    0
                 </p>
             </div>
 
-            <div class="no-print text-xs text-slate-400">
-                Formato A4
+            <div class="w-11 h-11 rounded-xl bg-teal-50 text-teal-600 flex items-center justify-center">
+                <i class="fa-solid fa-receipt"></i>
             </div>
 
         </div>
 
+    </div>
 
-        <div id="printArea">
 
-            <div id="receiptWrapper">
+    <div class="stat-card bg-white rounded-2xl border shadow-sm p-5">
 
-                <div id="receiptPDF">
-
-                    <div class="receipt-header">
-
-                        <div class="flex justify-between items-start gap-4">
-
-                            <div>
-                                <div class="receipt-title">
-                                    C.C. TRIVANI
-                                </div>
-
-                                <div class="receipt-subtitle">
-                                    CENTRO COMERCIAL TRIVANI
-                                </div>
-
-                                <div class="receipt-subtitle">
-                                    Sistema de Gestión de Pagos
-                                </div>
-                            </div>
-
-                            <div class="text-right">
-
-                                <div class="text-[9px] font-black text-slate-500">
-                                    COMPROBANTE
-                                </div>
-
-                                <div
-                                    id="previewComprobante"
-                                    class="text-[12px] font-black text-blue-700"
-                                >
-                                    RECIBO DE ALQUILER
-                                </div>
-
-                                <div
-                                    id="previewCodigo"
-                                    class="text-[8px] text-slate-500 mt-1"
-                                >
-                                    Código: PENDIENTE
-                                </div>
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-
-                    <!-- DATOS DEL INQUILINO -->
-
-                    <div class="receipt-box">
-
-                        <div class="receipt-box-title">
-                            DATOS DEL INQUILINO
-                        </div>
-
-                        <div class="receipt-row">
-                            <div class="receipt-label">
-                                NOMBRE
-                            </div>
-
-                            <div
-                                id="previewInquilino"
-                                class="receipt-value"
-                            >
-                                -
-                            </div>
-                        </div>
-
-                        <div class="receipt-row">
-                            <div class="receipt-label">
-                                DNI
-                            </div>
-
-                            <div
-                                id="previewDni"
-                                class="receipt-value"
-                            >
-                                -
-                            </div>
-                        </div>
-
-                    </div>
-
-
-                    <!-- DATOS DEL PAGO -->
-
-                    <div class="receipt-box">
-
-                        <div class="receipt-box-title">
-                            DATOS DEL PAGO
-                        </div>
-
-                        <div class="receipt-row">
-
-                            <div class="receipt-label">
-                                CONCEPTO
-                            </div>
-
-                            <div
-                                id="previewConcepto"
-                                class="receipt-value"
-                            >
-                                -
-                            </div>
-
-                        </div>
-
-
-                        <div class="receipt-row">
-
-                            <div class="receipt-label">
-                                PERIODO
-                            </div>
-
-                            <div
-                                id="previewPeriodo"
-                                class="receipt-value"
-                            >
-                                -
-                            </div>
-
-                        </div>
-
-
-                        <div class="receipt-row">
-
-                            <div class="receipt-label">
-                                FECHA DE OPERACIÓN
-                            </div>
-
-                            <div
-                                id="previewFecha"
-                                class="receipt-value"
-                            >
-                                -
-                            </div>
-
-                        </div>
-
-
-                        <div class="receipt-row">
-
-                            <div class="receipt-label">
-                                UBICACIÓN
-                            </div>
-
-                            <div
-                                id="previewUbicacion"
-                                class="receipt-value"
-                            >
-                                Centro Comercial Trivani
-                            </div>
-
-                        </div>
-
-
-                        <div class="receipt-row">
-
-                            <div class="receipt-label">
-                                CUENTA / BANCO
-                            </div>
-
-                            <div
-                                id="previewBanco"
-                                class="receipt-value"
-                            >
-                                -
-                            </div>
-
-                        </div>
-
-                    </div>
-
-
-                    <!-- ARRENDADOR -->
-
-                    <div class="receipt-box">
-
-                        <div class="receipt-box-title">
-                            DATOS DEL ARRENDADOR
-                        </div>
-
-                        <div class="receipt-row">
-
-                            <div class="receipt-label">
-                                NOMBRE
-                            </div>
-
-                            <div class="receipt-value">
-                                VÍCTOR ALMIRÓN PINCHI
-                            </div>
-
-                        </div>
-
-                        <div class="receipt-row">
-
-                            <div class="receipt-label">
-                                DNI
-                            </div>
-
-                            <div class="receipt-value">
-                                42897193
-                            </div>
-
-                        </div>
-
-                    </div>
-
-
-                    <!-- MONTO -->
-
-                    <div class="receipt-total">
-
-                        <div>
-
-                            <div class="receipt-total-label">
-                                MONTO TOTAL
-                            </div>
-
-                            <div
-                                id="previewMontoLetras"
-                                class="text-[8px] text-slate-500 mt-1"
-                            >
-                                -
-                            </div>
-
-                        </div>
-
-                        <div
-                            id="previewMonto"
-                            class="receipt-total-value"
-                        >
-                            S/ 0.00
-                        </div>
-
-                    </div>
-
-
-                    <!-- ESTADO -->
-
-                    <div class="mt-3 flex justify-end">
-
-                        <span
-                            id="previewEstado"
-                            class="receipt-status paid"
-                        >
-                            PAGADO
-                        </span>
-
-                    </div>
-
-
-                    <!-- FOOTER -->
-
-                    <div class="receipt-footer">
-
-                        <strong>IMPORTANTE:</strong>
-                        Este documento corresponde al registro interno
-                        del pago realizado al Centro Comercial Trivani.
-
-                        <br><br>
-
-                        Documento generado digitalmente por el
-                        Sistema de Gestión de Pagos C.C. Trivani.
-
-                    </div>
-
-                </div>
-
-            </div>
-
-        </div>
-
-    </section>
-
-
-    <!-- =====================================================
-         HISTORIAL
-    ====================================================== -->
-
-    <section class="glass-card p-5 md:p-7">
-
-        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-5">
+        <div class="flex justify-between">
 
             <div>
-
-                <h2 class="text-xl font-black text-slate-800">
-                    <i class="fa-solid fa-clock-rotate-left text-blue-600 mr-2"></i>
-                    Historial de pagos
-                </h2>
-
-                <p class="text-sm text-slate-500 mt-1">
-                    Consulta todos los comprobantes registrados.
+                <p class="text-xs font-bold text-slate-400 uppercase">
+                    Pagado
                 </p>
 
+                <p id="totalPagado"
+                   class="text-3xl font-black mt-1 text-emerald-600">
+                    S/ 0.00
+                </p>
             </div>
+
+            <div class="w-11 h-11 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                <i class="fa-solid fa-circle-check"></i>
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="stat-card bg-white rounded-2xl border shadow-sm p-5">
+
+        <div class="flex justify-between">
+
+            <div>
+                <p class="text-xs font-bold text-slate-400 uppercase">
+                    Pendiente
+                </p>
+
+                <p id="totalPendiente"
+                   class="text-3xl font-black mt-1 text-orange-600">
+                    S/ 0.00
+                </p>
+            </div>
+
+            <div class="w-11 h-11 rounded-xl bg-orange-50 text-orange-600 flex items-center justify-center">
+                <i class="fa-solid fa-clock"></i>
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="stat-card bg-white rounded-2xl border shadow-sm p-5">
+
+        <div class="flex justify-between">
+
+            <div>
+                <p class="text-xs font-bold text-slate-400 uppercase">
+                    Este mes
+                </p>
+
+                <p id="totalMes"
+                   class="text-3xl font-black mt-1 text-blue-600">
+                    S/ 0.00
+                </p>
+            </div>
+
+            <div class="w-11 h-11 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
+                <i class="fa-solid fa-calendar-days"></i>
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<div class="grid grid-cols-1 xl:grid-cols-12 gap-7">
+
+<!-- =========================================================
+     FORMULARIO
+========================================================= -->
+
+<section class="xl:col-span-5">
+
+<div class="bg-white rounded-2xl shadow-md border p-6">
+
+    <div class="flex justify-between items-center border-b pb-4 mb-5">
+
+        <div>
+
+            <h2 class="font-black text-lg">
+                Crear comprobante
+            </h2>
+
+            <p class="text-xs text-slate-400 mt-1">
+                Completa los datos del pago
+            </p>
+
+        </div>
+
+        <div class="w-10 h-10 bg-teal-50 text-teal-600 rounded-xl flex items-center justify-center">
+            <i class="fa-solid fa-file-invoice"></i>
+        </div>
+
+    </div>
+
+
+    <div class="mb-5">
+
+        <label class="block text-xs font-bold mb-1">
+            Tipo de servicio
+        </label>
+
+        <select
+            id="tipoComprobante"
+            onchange="cambiarTipoComprobante()"
+            class="w-full p-3 bg-slate-50 border rounded-xl text-xs outline-none focus:ring-2 focus:ring-teal-500">
+
+            <option value="SERVICIO DE LUZ">
+                CONSTANCIA DE PAGO — SERVICIO DE LUZ
+            </option>
+
+            <option value="ALQUILER DE LOCAL">
+                CONSTANCIA DE PAGO — ALQUILER DE LOCAL
+            </option>
+
+            <option value="SERVICIO DE AGUA">
+                CONSTANCIA DE PAGO — SERVICIO DE AGUA
+            </option>
+
+            <option value="MANTENIMIENTO">
+                CONSTANCIA DE PAGO — MANTENIMIENTO
+            </option>
+
+        </select>
+
+    </div>
+
+
+    <h3 class="font-black text-xs text-teal-700 border-b pb-2 mb-3">
+        DATOS DEL INQUILINO
+    </h3>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-5">
+
+        <div>
+
+            <label class="block text-xs font-bold mb-1">
+                Nombre
+            </label>
+
+            <input
+                id="inqNombre"
+                value="ESFRAIN CRUZ LLANOS"
+                oninput="actualizarPreview()"
+                class="w-full p-3 border rounded-xl text-xs">
+
+        </div>
+
+        <div>
+
+            <label class="block text-xs font-bold mb-1">
+                DNI
+            </label>
+
+            <input
+                id="inqDni"
+                value="47373742"
+                oninput="actualizarPreview()"
+                class="w-full p-3 border rounded-xl text-xs">
+
+        </div>
+
+    </div>
+
+
+    <h3 class="font-black text-xs text-teal-700 border-b pb-2 mb-3">
+        DETALLES DEL PAGO
+    </h3>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+
+        <div>
+
+            <label class="block text-xs font-bold mb-1">
+                Monto (S/)
+            </label>
+
+            <input
+                type="number"
+                id="montoInput"
+                value="93.60"
+                step="0.01"
+                oninput="actualizarPreview()"
+                class="w-full p-3 border rounded-xl text-xs">
+
+        </div>
+
+        <div>
+
+            <label class="block text-xs font-bold mb-1">
+                Monto en letras
+            </label>
+
+            <input
+                id="montoLetrasInput"
+                value="Noventa y tres y 60/100 Soles"
+                oninput="actualizarPreview()"
+                class="w-full p-3 border rounded-xl text-xs">
+
+        </div>
+
+    </div>
+
+
+    <div class="mt-3">
+
+        <label class="block text-xs font-bold mb-1">
+            Concepto
+        </label>
+
+        <input
+            id="conceptoInput"
+            value="Pago de Servicio de Energía Eléctrica (Luz)"
+            oninput="actualizarPreview()"
+            class="w-full p-3 border rounded-xl text-xs">
+
+    </div>
+
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3">
+
+        <div>
+
+            <label class="block text-xs font-bold mb-1">
+                Periodo / Mes
+            </label>
+
+            <input
+                id="periodoInput"
+                oninput="actualizarPreview()"
+                class="w-full p-3 border rounded-xl text-xs">
+
+        </div>
+
+        <div>
+
+            <label class="block text-xs font-bold mb-1">
+                Fecha de operación
+            </label>
+
+            <input
+                id="fechaInput"
+                oninput="actualizarPreview()"
+                class="w-full p-3 border rounded-xl text-xs">
+
+        </div>
+
+    </div>
+
+
+    <div class="mt-3">
+
+        <label class="block text-xs font-bold mb-1">
+            Ubicación / Inmueble
+        </label>
+
+        <input
+            id="ubicacionInput"
+            value="Centro Comercial Trivani"
+            oninput="actualizarPreview()"
+            class="w-full p-3 border rounded-xl text-xs">
+
+    </div>
+
+
+    <div class="mt-3">
+
+        <label class="block text-xs font-bold mb-1">
+            Banco / Cuenta Destino
+        </label>
+
+        <input
+            id="bancoInput"
+            value="Banco de la Nación (Cta. 04-227-354750)"
+            oninput="actualizarPreview()"
+            class="w-full p-3 border rounded-xl text-xs">
+
+    </div>
+
+
+    <div class="mt-5">
+
+        <label class="block text-xs font-bold mb-2">
+            Estado inicial
+        </label>
+
+        <div class="grid grid-cols-2 gap-2">
+
+            <button
+                type="button"
+                id="btnEstadoPagado"
+                onclick="seleccionarEstado('pagado')"
+                class="p-3 rounded-xl border-2 border-emerald-500 bg-emerald-50 text-emerald-700 text-xs font-bold">
+
+                <i class="fa-solid fa-circle-check mr-1"></i>
+                PAGADO
+
+            </button>
 
 
             <button
                 type="button"
-                class="btn btn-secondary"
-                onclick="cargarHistorialManual()"
-            >
-                <i class="fa-solid fa-rotate"></i>
-                Actualizar
+                id="btnEstadoPendiente"
+                onclick="seleccionarEstado('pendiente')"
+                class="p-3 rounded-xl border text-slate-500 text-xs font-bold">
+
+                <i class="fa-solid fa-clock mr-1"></i>
+                PENDIENTE
+
             </button>
 
         </div>
 
+    </div>
 
-        <!-- FILTROS -->
 
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
+    <div class="mt-6 space-y-2">
 
-            <div class="lg:col-span-2">
+        <button
+            onclick="guardarComprobante()"
+            id="btnGuardar"
+            class="w-full py-3.5 bg-teal-600 hover:bg-teal-700 text-white font-black rounded-xl shadow-lg">
 
-                <input
-                    id="searchHistory"
-                    class="input-control"
-                    type="search"
-                    placeholder="Buscar por nombre, DNI, concepto..."
-                    oninput="renderizarHistorial()"
-                >
+            <i class="fa-solid fa-cloud-arrow-up mr-2"></i>
+            GUARDAR + GENERAR PDF
+
+        </button>
+
+
+        <button
+            onclick="crearEnlacePago()"
+            id="btnPago"
+            class="w-full py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-black rounded-xl">
+
+            <i class="fa-solid fa-link mr-2"></i>
+            GENERAR ENLACE DE PAGO
+
+        </button>
+
+
+        <button
+            onclick="imprimirComprobante()"
+            class="w-full py-3 bg-slate-800 hover:bg-slate-900 text-white font-bold rounded-xl">
+
+            <i class="fa-solid fa-print mr-2"></i>
+            IMPRIMIR A4
+
+        </button>
+
+    </div>
+
+
+    <div id="resultadoPago"
+         class="hidden mt-4 p-4 bg-blue-50 border border-blue-200 rounded-xl">
+
+        <p class="text-xs font-black text-blue-800 mb-2">
+            ENLACE DE PAGO
+        </p>
+
+        <div class="flex gap-2">
+
+            <input
+                id="linkPagoGenerado"
+                readonly
+                class="flex-1 p-2 bg-white border rounded-lg text-xs">
+
+            <button
+                onclick="copiarLinkPago()"
+                class="px-3 bg-blue-600 text-white rounded-lg">
+
+                <i class="fa-solid fa-copy"></i>
+
+            </button>
+
+        </div>
+
+        <button
+            onclick="abrirWhatsApp()"
+            class="w-full mt-2 py-2 bg-green-600 text-white rounded-lg text-xs font-bold">
+
+            <i class="fa-brands fa-whatsapp mr-1"></i>
+            ENVIAR POR WHATSAPP
+
+        </button>
+
+    </div>
+
+</div>
+
+</section>
+
+
+<!-- =========================================================
+     COMPROBANTE
+========================================================= -->
+
+<section class="xl:col-span-7">
+
+<div class="bg-slate-200 rounded-2xl p-3 md:p-6 overflow-auto">
+
+<div
+    id="receiptPDF"
+    class="bg-white p-10 rounded-lg shadow-2xl border border-slate-300 relative flex flex-col justify-between overflow-hidden">
+
+    <div class="watermark">
+        C.C. TRIVANI • DOCUMENTO OFICIAL
+    </div>
+
+    <div class="receipt-content">
+
+        <header class="text-center pb-4 mb-6 border-b-2 border-teal-700">
+
+            <h1
+                id="pvTituloHeader"
+                class="text-xl font-extrabold text-teal-800 tracking-wide uppercase">
+
+                CONSTANCIA DE PAGO — SERVICIO DE LUZ
+
+            </h1>
+
+            <p class="text-xs font-semibold text-slate-500 mt-1">
+
+                Centro Comercial Trivani — Mes de
+                <span id="pvMesHeader"></span>
+
+            </p>
+
+        </header>
+
+
+        <p class="text-xs text-slate-600 text-justify leading-relaxed mb-6">
+
+            Por medio del presente documento, se deja constancia formal de la
+            recepción del pago por concepto del
+            <strong id="pvTextoConcepto">
+                servicio de energía eléctrica (luz)
+            </strong>
+            correspondiente al mes de
+            <strong id="pvMesCuerpo"></strong>
+            por el uso del local comercial dentro del
+            <strong id="pvUbicacionCuerpo">
+                Centro Comercial Trivani
+            </strong>.
+
+        </p>
+
+
+        <div class="bg-slate-50 border border-slate-200 rounded-md p-4 text-center mb-6">
+
+            <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">
+                MONTO TOTAL
+            </span>
+
+            <span class="text-2xl font-black text-slate-900">
+                S/
+                <span id="pvMonto">
+                    93.60
+                </span>
+            </span>
+
+            <p class="text-xs font-medium text-slate-500 mt-1">
+
+                Son:
+                <span id="pvMontoLetras">
+                    Noventa y tres y 60/100 Soles
+                </span>
+
+            </p>
+
+        </div>
+
+
+        <div class="mb-6">
+
+            <h3 class="text-xs font-bold uppercase text-teal-800 mb-2">
+                INFORMACIÓN DE LAS PARTES
+            </h3>
+
+            <div class="border-t border-slate-200 divide-y divide-slate-200 text-xs">
+
+                <div class="py-2 flex">
+                    <span class="w-1/3 font-semibold text-slate-600">
+                        Inquilino / Depositante:
+                    </span>
+
+                    <strong id="pvInqNombre"
+                            class="w-2/3 text-slate-900">
+                        ESFRAIN CRUZ LLANOS
+                    </strong>
+                </div>
+
+
+                <div class="py-2 flex">
+                    <span class="w-1/3 font-semibold text-slate-600">
+                        DNI Depositante:
+                    </span>
+
+                    <span id="pvInqDni"
+                          class="w-2/3">
+                        47373742
+                    </span>
+                </div>
+
+
+                <div class="py-2 flex">
+                    <span class="w-1/3 font-semibold text-slate-600">
+                        Arrendador / Beneficiario:
+                    </span>
+
+                    <strong class="w-2/3 text-slate-900">
+                        VÍCTOR ALMIRÓN PINCHI
+                    </strong>
+                </div>
+
+
+                <div class="py-2 flex">
+                    <span class="w-1/3 font-semibold text-slate-600">
+                        DNI Arrendador:
+                    </span>
+
+                    <span class="w-2/3">
+                        42897193
+                    </span>
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="mb-6">
+
+            <h3 class="text-xs font-bold uppercase text-teal-800 mb-2">
+                DETALLES DEL SERVICIO Y PAGO
+            </h3>
+
+            <div class="border-t border-slate-200 divide-y divide-slate-200 text-xs">
+
+                <div class="py-2 flex">
+                    <span class="w-1/3 font-semibold text-slate-600">
+                        Concepto:
+                    </span>
+
+                    <span id="pvConcepto"
+                          class="w-2/3">
+                        Pago de Servicio de Energía Eléctrica (Luz)
+                    </span>
+                </div>
+
+
+                <div class="py-2 flex">
+                    <span class="w-1/3 font-semibold text-slate-600">
+                        Periodo / Mes:
+                    </span>
+
+                    <span id="pvPeriodo"
+                          class="w-2/3">
+                    </span>
+                </div>
+
+
+                <div class="py-2 flex">
+                    <span class="w-1/3 font-semibold text-slate-600">
+                        Ubicación / Inmueble:
+                    </span>
+
+                    <span id="pvUbicacion"
+                          class="w-2/3">
+                        Centro Comercial Trivani
+                    </span>
+                </div>
+
+
+                <div class="py-2 flex">
+                    <span class="w-1/3 font-semibold text-slate-600">
+                        Banco / Cuenta:
+                    </span>
+
+                    <span id="pvBanco"
+                          class="w-2/3">
+                        Banco de la Nación
+                    </span>
+                </div>
+
+
+                <div class="py-2 flex">
+                    <span class="w-1/3 font-semibold text-slate-600">
+                        Fecha:
+                    </span>
+
+                    <span id="pvFecha"
+                          class="w-2/3">
+                    </span>
+                </div>
+
+
+                <div class="py-2 flex">
+
+                    <span class="w-1/3 font-semibold text-slate-600">
+                        Estado:
+                    </span>
+
+                    <strong id="pvEstado"
+                            class="w-2/3 text-emerald-600">
+                        PAGADO
+                    </strong>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <p id="pvNotaPie"
+           class="text-[10px] text-slate-400 italic bg-slate-50 p-2 rounded border border-slate-100">
+
+            Nota: Este documento acredita la recepción conforme del pago
+            correspondiente al consumo de energía eléctrica del local comercial
+            para el periodo indicado, sirviendo como comprobante administrativo
+            para ambas partes.
+
+        </p>
+
+    </div>
+
+
+    <div class="firma-section mt-12 pt-6">
+
+        <div class="text-center w-1/2 mx-auto">
+
+            <div class="border-b border-slate-400 w-3/4 mx-auto mb-2"></div>
+
+            <p class="text-xs font-bold text-slate-900">
+                VÍCTOR ALMIRÓN PINCHI
+            </p>
+
+            <p class="text-[10px] text-slate-500">
+                DNI: 42897193
+            </p>
+
+            <p class="text-[10px] font-semibold text-slate-600">
+                Arrendador / Beneficiario
+            </p>
+
+        </div>
+
+
+        <div class="flex justify-between items-center text-[10px] text-slate-400 mt-8 border-t pt-2">
+
+            <span id="pvFooterDoc">
+                Centro Comercial Trivani — Comprobante Servicio de Luz
+            </span>
+
+            <span>
+                Página 1 de 1
+            </span>
+
+        </div>
+
+    </div>
+
+</div>
+
+</div>
+
+</section>
+
+</div>
+
+
+<!-- =========================================================
+     HISTORIAL
+========================================================= -->
+
+<section class="bg-white rounded-2xl shadow-md border mt-7 overflow-hidden">
+
+    <div class="p-6 border-b">
+
+        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+
+            <div>
+
+                <h2 class="font-black text-xl">
+                    <i class="fa-solid fa-clock-rotate-left text-teal-600 mr-2"></i>
+                    Historial de pagos
+                </h2>
+
+                <p class="text-xs text-slate-400 mt-1">
+                    Documentos almacenados en Firebase
+                </p>
 
             </div>
 
 
-            <div>
+            <div class="flex flex-col sm:flex-row gap-2">
+
+                <input
+                    id="buscador"
+                    oninput="aplicarFiltros()"
+                    placeholder="Buscar nombre, DNI, concepto..."
+                    class="p-3 border rounded-xl text-xs w-full sm:w-64">
 
                 <select
-                    id="filterStatus"
-                    class="input-control"
-                    onchange="renderizarHistorial()"
-                >
+                    id="filtroEstado"
+                    onchange="aplicarFiltros()"
+                    class="p-3 border rounded-xl text-xs">
+
                     <option value="todos">
                         Todos los estados
                     </option>
@@ -1415,44 +1043,51 @@
                     <option value="pendiente">
                         Pendientes
                     </option>
+
                 </select>
 
             </div>
 
-
-            <div>
-
-                <input
-                    id="filterDate"
-                    class="input-control"
-                    type="month"
-                    onchange="renderizarHistorial()"
-                >
-
-            </div>
-
         </div>
 
 
-        <div id="historyContainer">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-4">
 
-            <div class="loading">
-                <i class="fa-solid fa-spinner fa-spin"></i>
+            <input
+                id="fechaDesde"
+                type="date"
+                onchange="aplicarFiltros()"
+                class="p-3 border rounded-xl text-xs">
+
+            <input
+                id="fechaHasta"
+                type="date"
+                onchange="aplicarFiltros()"
+                class="p-3 border rounded-xl text-xs">
+
+        </div>
+
+    </div>
+
+
+    <div id="historialContainer"
+         class="p-6 grid grid-cols-1 lg:grid-cols-2 gap-4">
+
+        <div class="col-span-full text-center py-10 text-slate-400">
+
+            <i class="fa-solid fa-spinner fa-spin text-2xl mb-3"></i>
+
+            <p class="text-sm">
                 Cargando historial...
-            </div>
+            </p>
 
         </div>
 
-    </section>
+    </div>
+
+</section>
 
 </main>
-
-
-<!-- =========================================================
-     TOAST
-========================================================= -->
-
-<div id="toastContainer"></div>
 
 
 <!-- =========================================================
@@ -1461,2319 +1096,2106 @@
 
 <script type="module">
 
-    import { initializeApp }
-        from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import {
+    initializeApp
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 
-    import {
-        getFirestore,
-        collection,
-        addDoc,
-        deleteDoc,
-        updateDoc,
-        doc,
-        onSnapshot,
-        query,
-        orderBy,
-        serverTimestamp
+import {
+    getFirestore,
+    collection,
+    addDoc,
+    deleteDoc,
+    updateDoc,
+    doc,
+    onSnapshot,
+    query,
+    orderBy,
+    serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+import {
+    getStorage,
+    ref,
+    uploadBytes,
+    getDownloadURL
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
+
+
+/* =========================================================
+   CONFIGURACIÓN FIREBASE
+========================================================= */
+
+const firebaseConfig = {
+
+    apiKey: "ATzaSyA3KMVMq-HcGhn1DuTk868J8cylorSjtiU",
+
+    authDomain: "trivanipagos.firebaseapp.com",
+
+    projectId: "trivanipagos",
+
+    storageBucket: "trivanipagos.firebasestorage.app",
+
+    messagingSenderId: "505581253434",
+
+    appId: "1:505581253434:web:e4cd15c81ae8be65a81603",
+
+    measurementId: "G-TKVCZRMFT2"
+
+};
+
+
+const app = initializeApp(firebaseConfig);
+
+const db = getFirestore(app);
+
+const storage = getStorage(app);
+
+const pagosRef = collection(db, "pagos_trivani");
+
+
+/* =========================================================
+   VARIABLES
+========================================================= */
+
+let todosLosPagos = [];
+
+let estadoSeleccionado = "pagado";
+
+let ultimoLinkPago = "";
+
+
+/* =========================================================
+   CONEXIÓN FIREBASE
+========================================================= */
+
+document.getElementById("estadoFirebase").innerHTML =
+    '<i class="fa-solid fa-circle text-emerald-400"></i> Firebase conectado';
+
+
+/* =========================================================
+   HISTORIAL
+========================================================= */
+
+const q = query(
+    pagosRef,
+    orderBy("registroNube", "desc")
+);
+
+
+onSnapshot(q, (snapshot) => {
+
+    todosLosPagos = [];
+
+    snapshot.forEach((documento) => {
+
+        todosLosPagos.push({
+            id: documento.id,
+            ...documento.data()
+        });
+
+    });
+
+    aplicarFiltros();
+
+}, (error) => {
+
+    console.error(error);
+
+    document.getElementById("estadoFirebase").innerHTML =
+        '<i class="fa-solid fa-circle text-red-500"></i> Error Firebase';
+
+    document.getElementById("historialContainer").innerHTML = `
+
+        <div class="col-span-full text-center py-10 text-red-500">
+
+            <i class="fa-solid fa-triangle-exclamation text-3xl mb-3"></i>
+
+            <p>
+                No se pudo cargar Firebase.
+            </p>
+
+        </div>
+
+    `;
+
+});
+
+
+/* =========================================================
+   ELIMINAR
+========================================================= */
+
+window.eliminarRegistro = async function(id) {
+
+    if (!confirm("¿Deseas eliminar definitivamente este registro?")) {
+        return;
     }
-    from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-    import {
-        getStorage,
-        ref,
-        uploadBytes,
-        getDownloadURL
+    try {
+
+        await deleteDoc(
+            doc(db, "pagos_trivani", id)
+        );
+
+    } catch (error) {
+
+        console.error(error);
+
+        alert(
+            "No se pudo eliminar el registro.\n\n" +
+            "Revisa las reglas de seguridad de Firebase."
+        );
+
     }
-    from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
+
+};
 
 
-    /* ========================================================
-       CONFIGURACIÓN FIREBASE
-    ======================================================== */
+/* =========================================================
+   MARCAR PAGADO
+========================================================= */
 
-    const firebaseConfig = {
+window.marcarPagado = async function(id) {
 
-        apiKey: "TU_API_KEY",
+    if (!confirm("¿Confirmar este pago como PAGADO?")) {
+        return;
+    }
 
-        authDomain: "trivanipagos.firebaseapp.com",
+    try {
 
-        projectId: "trivanipagos",
+        await updateDoc(
+            doc(db, "pagos_trivani", id),
+            {
+                estadoPago: "pagado",
+                fechaConfirmacion: serverTimestamp()
+            }
+        );
 
-        storageBucket: "trivanipagos.firebasestorage.app",
+    } catch (error) {
 
-        messagingSenderId: "TU_MESSAGING_SENDER_ID",
+        console.error(error);
 
-        appId: "TU_APP_ID"
+        alert("No se pudo actualizar el estado.");
 
-    };
+    }
 
-
-    /*
-        IMPORTANTE:
-
-        Si en tu index.html actual ya tienes apiKey,
-        messagingSenderId y appId reales, conserva esos
-        valores.
-
-        No cambies esos datos por los textos TU_...
-    */
-
-
-    const app = initializeApp(firebaseConfig);
-
-    const db = getFirestore(app);
-
-    const storage = getStorage(app);
+};
 
 
-    window.firebaseDB = db;
+/* =========================================================
+   ABRIR PDF
+========================================================= */
 
-    window.firebaseStorage = storage;
+window.abrirPDF = function(url) {
 
-    window.firebaseFunctions = {
+    if (!url) {
 
-        collection,
-        addDoc,
-        deleteDoc,
-        updateDoc,
-        doc,
-        onSnapshot,
-        query,
-        orderBy,
-        serverTimestamp,
-        ref,
-        uploadBytes,
-        getDownloadURL
+        alert(
+            "Este registro todavía no tiene un PDF almacenado."
+        );
 
-    };
+        return;
+    }
+
+    window.open(url, "_blank");
+
+};
 
 
-    /* ========================================================
-       CARGAR HISTORIAL AUTOMÁTICAMENTE
-    ======================================================== */
+/* =========================================================
+   DESCARGAR PDF
+========================================================= */
 
-    const pagosRef = collection(db, "pagos_trivani");
+window.descargarPDF = function(url, nombre) {
 
-    const pagosQuery = query(
-        pagosRef,
-        orderBy("registroNube", "desc")
-    );
+    if (!url) {
+
+        alert("No existe un PDF para este registro.");
+
+        return;
+    }
+
+    const enlace = document.createElement("a");
+
+    enlace.href = url;
+
+    enlace.target = "_blank";
+
+    enlace.download = nombre || "comprobante-trivani.pdf";
+
+    document.body.appendChild(enlace);
+
+    enlace.click();
+
+    enlace.remove();
+
+};
 
 
-    onSnapshot(
-        pagosQuery,
-        (snapshot) => {
+/* =========================================================
+   COMPARTIR PDF
+========================================================= */
 
-            window.pagosActuales = [];
+window.compartirPDF = async function(url, nombre) {
 
-            snapshot.forEach((item) => {
+    if (!url) {
 
-                window.pagosActuales.push({
+        alert("No existe un PDF para compartir.");
 
-                    id: item.id,
+        return;
+    }
 
-                    ...item.data()
+    if (navigator.share) {
 
-                });
+        try {
 
+            await navigator.share({
+                title: "Comprobante Centro Comercial Trivani",
+                text: "Comprobante de pago",
+                url: url
             });
 
+        } catch (error) {
 
-            actualizarResumen();
-
-            renderizarHistorial();
-
-        },
-
-        (error) => {
-
-            console.error(
-                "Error Firebase:",
-                error
-            );
-
-            document.getElementById(
-                "historyContainer"
-            ).innerHTML = `
-
-                <div class="p-5 rounded-xl bg-red-50 border border-red-200 text-red-700">
-
-                    <div class="font-black mb-1">
-                        <i class="fa-solid fa-triangle-exclamation mr-1"></i>
-                        No se pudo cargar el historial
-                    </div>
-
-                    <div class="text-sm">
-                        ${escapeHTML(error.message)}
-                    </div>
-
-                </div>
-
-            `;
+            console.log("Compartir cancelado.");
 
         }
 
+    } else {
+
+        try {
+
+            await navigator.clipboard.writeText(url);
+
+            alert(
+                "El enlace del PDF fue copiado al portapapeles."
+            );
+
+        } catch {
+
+            alert("No se pudo copiar el enlace.");
+
+        }
+
+    }
+
+};
+
+
+/* =========================================================
+   GUARDAR COMPROBANTE
+========================================================= */
+
+window.guardarComprobante = async function() {
+
+    const boton = document.getElementById("btnGuardar");
+
+    boton.disabled = true;
+
+    boton.innerHTML =
+        '<i class="fa-solid fa-spinner fa-spin mr-2"></i> GENERANDO PDF...';
+
+
+    try {
+
+        const datos = obtenerDatosFormulario();
+
+
+        /* Actualizamos el comprobante antes de generar el PDF */
+        actualizarPreview();
+
+
+        /* -------------------------------------------------
+           GUARDAR EN FIRESTORE
+        ------------------------------------------------- */
+
+        const documento = await addDoc(
+            pagosRef,
+            {
+                ...datos,
+
+                estadoPago: estadoSeleccionado,
+
+                pdfUrl: "",
+
+                pdfNombre: "",
+
+                linkPago: "",
+
+                registroNube: serverTimestamp(),
+
+                fechaConfirmacion:
+                    estadoSeleccionado === "pagado"
+                        ? serverTimestamp()
+                        : null
+            }
+        );
+
+
+        /* -------------------------------------------------
+           GENERAR PDF
+        ------------------------------------------------- */
+
+        const blob = await generarPDFBlob();
+
+
+        boton.innerHTML =
+            '<i class="fa-solid fa-cloud-arrow-up mr-2"></i> SUBIENDO PDF...';
+
+
+        /* -------------------------------------------------
+           SUBIR PDF
+        ------------------------------------------------- */
+
+        const nombrePDF =
+            "comprobantes/" +
+            documento.id +
+            "_" +
+            limpiarNombre(datos.inquilino) +
+            ".pdf";
+
+
+        const archivoRef =
+            ref(storage, nombrePDF);
+
+
+        await uploadBytes(
+            archivoRef,
+            blob,
+            {
+                contentType:"application/pdf"
+            }
+        );
+
+
+        const urlPDF =
+            await getDownloadURL(archivoRef);
+
+
+        /* -------------------------------------------------
+           ACTUALIZAR FIRESTORE
+        ------------------------------------------------- */
+
+        await updateDoc(
+            doc(db, "pagos_trivani", documento.id),
+            {
+                pdfUrl:urlPDF,
+                pdfNombre:nombrePDF
+            }
+        );
+
+
+        alert(
+            "Comprobante guardado correctamente.\n\n" +
+            "PDF almacenado en Firebase."
+        );
+
+
+        window.open(urlPDF, "_blank");
+
+
+        boton.innerHTML =
+            '<i class="fa-solid fa-cloud-arrow-up mr-2"></i> GUARDAR + GENERAR PDF';
+
+
+    } catch (error) {
+
+        console.error(error);
+
+        alert(
+            "Ocurrió un error al guardar el comprobante.\n\n" +
+            error.message
+        );
+
+        boton.innerHTML =
+            '<i class="fa-solid fa-cloud-arrow-up mr-2"></i> GUARDAR + GENERAR PDF';
+
+    }
+
+
+    boton.disabled = false;
+
+};
+
+
+/* =========================================================
+   GENERAR PDF A4
+========================================================= */
+
+async function generarPDFBlob() {
+
+    const elemento =
+        document.getElementById("receiptPDF");
+
+    if (!elemento) {
+        throw new Error("No se encontró el comprobante.");
+    }
+
+    actualizarPreview();
+
+    /*
+     * Guardamos los estilos originales para restaurarlos.
+     */
+    const estilosOriginales = {
+        transform: elemento.style.transform,
+        width: elemento.style.width,
+        height: elemento.style.height,
+        minHeight: elemento.style.minHeight,
+        maxHeight: elemento.style.maxHeight,
+        margin: elemento.style.margin,
+        overflow: elemento.style.overflow
+    };
+
+    try {
+
+        /*
+         * Quitamos únicamente el escalado móvil.
+         * Esto evita que html2canvas capture un comprobante
+         * reducido o desplazado.
+         */
+        elemento.style.transform = "none";
+        elemento.style.width = "210mm";
+        elemento.style.height = "297mm";
+        elemento.style.minHeight = "297mm";
+        elemento.style.maxHeight = "297mm";
+        elemento.style.margin = "0";
+        elemento.style.overflow = "hidden";
+
+
+        /*
+         * Esperamos a que el navegador termine de pintar
+         * el comprobante antes de capturarlo.
+         */
+        await new Promise(resolve => {
+            requestAnimationFrame(() => {
+                requestAnimationFrame(resolve);
+            });
+        });
+
+
+        const canvas =
+            await html2canvas(
+                elemento,
+                {
+                    scale:2,
+                    useCORS:true,
+                    allowTaint:false,
+                    backgroundColor:"#ffffff",
+                    logging:false,
+                    imageTimeout:15000
+                }
+            );
+
+
+        const {
+            jsPDF
+        } = window.jspdf;
+
+
+        const pdf =
+            new jsPDF(
+                "p",
+                "mm",
+                "a4"
+            );
+
+
+        const pageWidth = 210;
+        const pageHeight = 297;
+
+        const margin = 0;
+
+        const availableWidth =
+            pageWidth - margin * 2;
+
+        const availableHeight =
+            pageHeight - margin * 2;
+
+
+        const escala =
+            Math.min(
+                availableWidth / canvas.width,
+                availableHeight / canvas.height
+            );
+
+
+        const ancho =
+            canvas.width * escala;
+
+        const alto =
+            canvas.height * escala;
+
+
+        const x =
+            (pageWidth - ancho) / 2;
+
+        const y =
+            (pageHeight - alto) / 2;
+
+
+        pdf.addImage(
+            canvas.toDataURL(
+                "image/jpeg",
+                0.95
+            ),
+            "JPEG",
+            x,
+            y,
+            ancho,
+            alto
+        );
+
+
+        return pdf.output("blob");
+
+    } finally {
+
+        /*
+         * Restauramos la vista original.
+         */
+        elemento.style.transform =
+            estilosOriginales.transform;
+
+        elemento.style.width =
+            estilosOriginales.width;
+
+        elemento.style.height =
+            estilosOriginales.height;
+
+        elemento.style.minHeight =
+            estilosOriginales.minHeight;
+
+        elemento.style.maxHeight =
+            estilosOriginales.maxHeight;
+
+        elemento.style.margin =
+            estilosOriginales.margin;
+
+        elemento.style.overflow =
+            estilosOriginales.overflow;
+
+    }
+
+}
+
+
+/* =========================================================
+   DATOS FORMULARIO
+========================================================= */
+
+function obtenerDatosFormulario() {
+
+    return {
+
+        tipoComprobante:
+            document.getElementById("tipoComprobante").value,
+
+        inquilino:
+            document.getElementById("inqNombre").value.trim(),
+
+        dniInquilino:
+            document.getElementById("inqDni").value.trim(),
+
+        monto:
+            parseFloat(
+                document.getElementById("montoInput").value
+            ) || 0,
+
+        montoLetras:
+            document.getElementById("montoLetrasInput").value.trim(),
+
+        concepto:
+            document.getElementById("conceptoInput").value.trim(),
+
+        periodo:
+            document.getElementById("periodoInput").value.trim(),
+
+        fechaOperacion:
+            document.getElementById("fechaInput").value.trim(),
+
+        ubicacion:
+            document.getElementById("ubicacionInput").value.trim(),
+
+        banco:
+            document.getElementById("bancoInput").value.trim()
+
+    };
+
+}
+
+
+/* =========================================================
+   ENLACE DE PAGO
+========================================================= */
+
+/*
+ * Si posteriormente tienes un backend real de Mercado Pago,
+ * coloca aquí su URL.
+ *
+ * Ejemplo:
+ *
+ * const MERCADO_PAGO_BACKEND =
+ *     "https://tu-servidor.com/api/crear-preferencia";
+ *
+ * NO coloques el Access Token aquí.
+ */
+
+const MERCADO_PAGO_BACKEND = "";
+
+
+window.crearEnlacePago = async function() {
+
+    const boton =
+        document.getElementById("btnPago");
+
+
+    const datos =
+        obtenerDatosFormulario();
+
+
+    if (!datos.monto || datos.monto <= 0) {
+
+        alert(
+            "Ingresa un monto válido antes de generar el enlace."
+        );
+
+        return;
+    }
+
+
+    /*
+     * Evitamos el error anterior:
+     * GitHub Pages no tiene /api/crear-preferencia.
+     */
+    if (!MERCADO_PAGO_BACKEND) {
+
+        alert(
+            "El enlace de pago todavía no está conectado.\n\n" +
+            "Tu página está funcionando en GitHub Pages y " +
+            "GitHub Pages no puede ejecutar el backend de Mercado Pago.\n\n" +
+            "Para generar un enlace REAL de cobro se necesita " +
+            "conectar un backend seguro de Mercado Pago.\n\n" +
+            "No coloques el ACCESS_TOKEN dentro de este HTML."
+        );
+
+        return;
+    }
+
+
+    boton.disabled = true;
+
+    boton.innerHTML =
+        '<i class="fa-solid fa-spinner fa-spin mr-2"></i> CREANDO ENLACE...';
+
+
+    try {
+
+        const respuesta =
+            await fetch(
+                MERCADO_PAGO_BACKEND,
+                {
+                    method:"POST",
+
+                    headers:{
+                        "Content-Type":"application/json"
+                    },
+
+                    body:JSON.stringify({
+
+                        titulo:
+                            datos.tipoComprobante,
+
+                        monto:
+                            datos.monto,
+
+                        documento:
+                            datos.dniInquilino,
+
+                        concepto:
+                            datos.concepto,
+
+                        periodo:
+                            datos.periodo
+
+                    })
+                }
+            );
+
+
+        if (!respuesta.ok) {
+
+            throw new Error(
+                "El servidor de Mercado Pago respondió con error."
+            );
+
+        }
+
+
+        const resultado =
+            await respuesta.json();
+
+
+        if (!resultado.init_point) {
+
+            throw new Error(
+                "Mercado Pago no devolvió un enlace de pago."
+            );
+
+        }
+
+
+        ultimoLinkPago =
+            resultado.init_point;
+
+
+        document.getElementById(
+            "linkPagoGenerado"
+        ).value =
+            ultimoLinkPago;
+
+
+        document.getElementById(
+            "resultadoPago"
+        ).classList.remove("hidden");
+
+
+        boton.innerHTML =
+            '<i class="fa-solid fa-link mr-2"></i> ENLACE GENERADO';
+
+
+    } catch (error) {
+
+        console.error(error);
+
+        alert(
+            "No se pudo generar el enlace de pago.\n\n" +
+            error.message
+        );
+
+        boton.innerHTML =
+            '<i class="fa-solid fa-link mr-2"></i> GENERAR ENLACE DE PAGO';
+
+    }
+
+
+    boton.disabled = false;
+
+};
+
+
+/* =========================================================
+   COPIAR LINK
+========================================================= */
+
+window.copiarLinkPago = async function() {
+
+    const input =
+        document.getElementById("linkPagoGenerado");
+
+
+    if (!input.value) {
+
+        alert("No hay ningún enlace para copiar.");
+
+        return;
+    }
+
+
+    try {
+
+        await navigator.clipboard.writeText(
+            input.value
+        );
+
+        alert("Enlace copiado.");
+
+    } catch {
+
+        input.select();
+
+        document.execCommand("copy");
+
+        alert("Enlace copiado.");
+
+    }
+
+};
+
+
+/* =========================================================
+   WHATSAPP
+========================================================= */
+
+window.abrirWhatsApp = function() {
+
+    if (!ultimoLinkPago) {
+
+        alert("Primero genera el enlace de pago.");
+
+        return;
+    }
+
+
+    const nombre =
+        document.getElementById("inqNombre").value;
+
+
+    const monto =
+        document.getElementById("montoInput").value;
+
+
+    const mensaje =
+        "Hola " +
+        nombre +
+        ", te envío el enlace para realizar el pago de S/ " +
+        monto +
+        " del Centro Comercial Trivani:\n\n" +
+        ultimoLinkPago;
+
+
+    window.open(
+        "https://wa.me/?text=" +
+        encodeURIComponent(mensaje),
+        "_blank"
     );
 
+};
 
-    window.firebaseReady = true;
+
+/* =========================================================
+   FILTROS
+========================================================= */
+
+window.aplicarFiltros = function() {
+
+    const buscador =
+        document.getElementById("buscador")
+        .value
+        .toLowerCase()
+        .trim();
+
+
+    const estado =
+        document.getElementById("filtroEstado").value;
+
+
+    const desde =
+        document.getElementById("fechaDesde").value;
+
+
+    const hasta =
+        document.getElementById("fechaHasta").value;
+
+
+    const filtrados =
+        todosLosPagos.filter((pago) => {
+
+            const texto = (
+
+                (pago.inquilino || "") +
+                " " +
+                (pago.dniInquilino || "") +
+                " " +
+                (pago.concepto || "") +
+                " " +
+                (pago.periodo || "") +
+                " " +
+                (pago.tipoComprobante || "")
+
+            ).toLowerCase();
+
+
+            if (
+                buscador &&
+                !texto.includes(buscador)
+            ) {
+
+                return false;
+
+            }
+
+
+            if (
+                estado !== "todos" &&
+                (pago.estadoPago || "pagado") !== estado
+            ) {
+
+                return false;
+
+            }
+
+
+            if (
+                desde &&
+                pago.fechaOperacion
+            ) {
+
+                const fechaPago =
+                    convertirFechaTexto(
+                        pago.fechaOperacion
+                    );
+
+
+                const fechaDesde =
+                    new Date(desde + "T00:00:00");
+
+
+                if (
+                    fechaPago &&
+                    fechaPago < fechaDesde
+                ) {
+
+                    return false;
+
+                }
+
+            }
+
+
+            if (
+                hasta &&
+                pago.fechaOperacion
+            ) {
+
+                const fechaPago =
+                    convertirFechaTexto(
+                        pago.fechaOperacion
+                    );
+
+
+                const fechaHasta =
+                    new Date(hasta + "T23:59:59");
+
+
+                if (
+                    fechaPago &&
+                    fechaPago > fechaHasta
+                ) {
+
+                    return false;
+
+                }
+
+            }
+
+
+            return true;
+
+        });
+
+
+    pintarHistorial(filtrados);
+
+    actualizarResumen(todosLosPagos);
+
+};
+
+
+/* =========================================================
+   PINTAR HISTORIAL
+========================================================= */
+
+function pintarHistorial(pagos) {
+
+    const contenedor =
+        document.getElementById(
+            "historialContainer"
+        );
+
+
+    if (!pagos.length) {
+
+        contenedor.innerHTML = `
+
+            <div class="col-span-full text-center py-12">
+
+                <div class="w-16 h-16 mx-auto bg-slate-100 rounded-full flex items-center justify-center text-slate-400 text-2xl">
+
+                    <i class="fa-solid fa-folder-open"></i>
+
+                </div>
+
+                <p class="font-bold text-slate-500 mt-3">
+                    No se encontraron registros
+                </p>
+
+                <p class="text-xs text-slate-400 mt-1">
+                    Prueba cambiando los filtros.
+                </p>
+
+            </div>
+
+        `;
+
+        return;
+    }
+
+
+    contenedor.innerHTML = "";
+
+
+    pagos.forEach((pago) => {
+
+        const estado =
+            pago.estadoPago || "pagado";
+
+
+        const fechaRegistro =
+            obtenerFechaRegistro(
+                pago.registroNube
+            );
+
+
+        const card =
+            document.createElement("div");
+
+
+        card.className =
+            "history-card bg-white border rounded-2xl p-5";
+
+
+        card.innerHTML = `
+
+            <div class="flex justify-between gap-3">
+
+                <div class="min-w-0">
+
+                    <div class="flex items-center gap-2 flex-wrap">
+
+                        <span class="text-[10px] font-black px-2 py-1 rounded-full
+                            ${estado === "pagado"
+                                ? "status-pagado"
+                                : "status-pendiente"}">
+
+                            <i class="fa-solid
+                                ${estado === "pagado"
+                                    ? "fa-circle-check"
+                                    : "fa-clock"} mr-1">
+                            </i>
+
+                            ${estado.toUpperCase()}
+
+                        </span>
+
+
+                        <span class="text-[10px] text-slate-400">
+                            ${escapeHTML(
+                                pago.tipoComprobante || "Pago"
+                            )}
+                        </span>
+
+                    </div>
+
+
+                    <h3 class="font-black text-sm mt-2 truncate">
+                        ${escapeHTML(
+                            pago.inquilino || "Sin nombre"
+                        )}
+                    </h3>
+
+
+                    <p class="text-xs text-slate-400">
+                        DNI: ${escapeHTML(
+                            pago.dniInquilino || "-"
+                        )}
+                    </p>
+
+                </div>
+
+
+                <div class="text-right shrink-0">
+
+                    <p class="text-lg font-black text-slate-900">
+                        S/ ${Number(
+                            pago.monto || 0
+                        ).toFixed(2)}
+                    </p>
+
+                    <p class="text-[10px] text-slate-400">
+                        ${escapeHTML(
+                            pago.periodo || "-"
+                        )}
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="mt-4 p-3 bg-slate-50 rounded-xl">
+
+                <p class="text-[10px] uppercase font-bold text-slate-400">
+                    Concepto
+                </p>
+
+                <p class="text-xs font-semibold text-slate-700 mt-1">
+                    ${escapeHTML(
+                        pago.concepto || "-"
+                    )}
+                </p>
+
+            </div>
+
+
+            <div class="grid grid-cols-2 gap-3 mt-4 text-[10px]">
+
+                <div>
+
+                    <p class="text-slate-400">
+                        Fecha operación
+                    </p>
+
+                    <p class="font-bold text-slate-600">
+                        ${escapeHTML(
+                            pago.fechaOperacion || "-"
+                        )}
+                    </p>
+
+                </div>
+
+
+                <div>
+
+                    <p class="text-slate-400">
+                        Registrado
+                    </p>
+
+                    <p class="font-bold text-slate-600">
+                        ${fechaRegistro}
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="flex flex-wrap gap-2 mt-5 pt-4 border-t">
+
+                ${
+                    pago.pdfUrl
+                    ?
+                    `
+
+                    <button
+                        onclick="abrirPDF('${escapeAttr(pago.pdfUrl)}')"
+                        class="px-3 py-2 bg-teal-50 text-teal-700 rounded-lg text-xs font-bold">
+
+                        <i class="fa-solid fa-eye mr-1"></i>
+                        Ver PDF
+
+                    </button>
+
+
+                    <button
+                        onclick="descargarPDF('${escapeAttr(pago.pdfUrl)}','${escapeAttr(pago.pdfNombre || "comprobante.pdf")}')"
+                        class="px-3 py-2 bg-slate-100 text-slate-700 rounded-lg text-xs font-bold">
+
+                        <i class="fa-solid fa-download mr-1"></i>
+                        Descargar
+
+                    </button>
+
+
+                    <button
+                        onclick="compartirPDF('${escapeAttr(pago.pdfUrl)}','${escapeAttr(pago.pdfNombre || "comprobante.pdf")}')"
+                        class="px-3 py-2 bg-blue-50 text-blue-700 rounded-lg text-xs font-bold">
+
+                        <i class="fa-solid fa-share-nodes mr-1"></i>
+                        Compartir
+
+                    </button>
+
+                    `
+                    :
+                    `
+
+                    <span class="px-3 py-2 bg-slate-100 text-slate-400 rounded-lg text-xs">
+
+                        <i class="fa-solid fa-file-circle-xmark mr-1"></i>
+
+                        Sin PDF
+
+                    </span>
+
+                    `
+                }
+
+
+                ${
+                    estado !== "pagado"
+                    ?
+                    `
+
+                    <button
+                        onclick="marcarPagado('${escapeAttr(pago.id)}')"
+                        class="px-3 py-2 bg-emerald-50 text-emerald-700 rounded-lg text-xs font-bold">
+
+                        <i class="fa-solid fa-check mr-1"></i>
+
+                        Marcar pagado
+
+                    </button>
+
+                    `
+                    :
+                    ""
+                }
+
+
+                ${
+                    pago.linkPago
+                    ?
+                    `
+
+                    <button
+                        onclick="window.open('${escapeAttr(pago.linkPago)}','_blank')"
+                        class="px-3 py-2 bg-blue-50 text-blue-700 rounded-lg text-xs font-bold">
+
+                        <i class="fa-solid fa-link mr-1"></i>
+
+                        Pago
+
+                    </button>
+
+                    `
+                    :
+                    ""
+                }
+
+
+                <button
+                    onclick="eliminarRegistro('${escapeAttr(pago.id)}')"
+                    class="px-3 py-2 bg-red-50 text-red-600 rounded-lg text-xs font-bold ml-auto">
+
+                    <i class="fa-solid fa-trash mr-1"></i>
+
+                    Eliminar
+
+                </button>
+
+            </div>
+
+        `;
+
+
+        contenedor.appendChild(card);
+
+    });
+
+}
+
+
+/* =========================================================
+   RESUMEN
+========================================================= */
+
+function actualizarResumen(pagos) {
+
+    let pagado = 0;
+
+    let pendiente = 0;
+
+    let mesActual = 0;
+
+
+    const ahora =
+        new Date();
+
+
+    pagos.forEach((pago) => {
+
+        const monto =
+            Number(pago.monto || 0);
+
+
+        if (
+            (pago.estadoPago || "pagado")
+            === "pagado"
+        ) {
+
+            pagado += monto;
+
+        } else {
+
+            pendiente += monto;
+
+        }
+
+
+        const fecha =
+            convertirFechaTexto(
+                pago.fechaOperacion
+            );
+
+
+        if (
+            fecha &&
+            fecha.getMonth() === ahora.getMonth() &&
+            fecha.getFullYear() === ahora.getFullYear()
+        ) {
+
+            mesActual += monto;
+
+        }
+
+    });
+
+
+    document.getElementById(
+        "totalRegistros"
+    ).textContent =
+        pagos.length;
+
+
+    document.getElementById(
+        "totalPagado"
+    ).textContent =
+        "S/ " +
+        pagado.toFixed(2);
+
+
+    document.getElementById(
+        "totalPendiente"
+    ).textContent =
+        "S/ " +
+        pendiente.toFixed(2);
+
+
+    document.getElementById(
+        "totalMes"
+    ).textContent =
+        "S/ " +
+        mesActual.toFixed(2);
+
+}
+
+
+/* =========================================================
+   FECHA FIREBASE
+========================================================= */
+
+function obtenerFechaRegistro(timestamp) {
+
+    if (!timestamp) {
+        return "Reciente";
+    }
+
+
+    try {
+
+        const fecha =
+            timestamp.toDate
+                ? timestamp.toDate()
+                : new Date(timestamp);
+
+
+        return fecha.toLocaleString(
+            "es-PE",
+            {
+                dateStyle:"short",
+                timeStyle:"short"
+            }
+        );
+
+    } catch {
+
+        return "Reciente";
+
+    }
+
+}
+
+
+/* =========================================================
+   LIMPIAR NOMBRE
+========================================================= */
+
+function limpiarNombre(texto) {
+
+    return String(texto || "cliente")
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/[^a-zA-Z0-9]/g, "_")
+        .substring(0,50);
+
+}
+
+
+/* =========================================================
+   ESCAPAR HTML
+========================================================= */
+
+function escapeHTML(texto) {
+
+    return String(texto ?? "")
+        .replace(/&/g,"&amp;")
+        .replace(/</g,"&lt;")
+        .replace(/>/g,"&gt;")
+        .replace(/"/g,"&quot;")
+        .replace(/'/g,"&#039;");
+
+}
+
+
+function escapeAttr(texto) {
+
+    return String(texto ?? "")
+        .replace(/\\/g,"\\\\")
+        .replace(/'/g,"\\'");
+
+}
+
+
+/* =========================================================
+   FECHA TEXTO
+========================================================= */
+
+function convertirFechaTexto(texto) {
+
+    if (!texto) {
+        return null;
+    }
+
+
+    const textoNormalizado =
+        String(texto).trim();
+
+
+    /*
+     * Formato:
+     * 03 de Octubre de 2026
+     */
+
+    const partes =
+        textoNormalizado.match(
+            /(\d{1,2}).*?([A-Za-zÁÉÍÓÚáéíóú]+).*?(\d{4})/i
+        );
+
+
+    if (!partes) {
+
+        /*
+         * Intentamos también formato YYYY-MM-DD.
+         */
+
+        const iso =
+            textoNormalizado.match(
+                /^(\d{4})-(\d{2})-(\d{2})$/
+            );
+
+
+        if (iso) {
+
+            return new Date(
+                Number(iso[1]),
+                Number(iso[2]) - 1,
+                Number(iso[3])
+            );
+
+        }
+
+
+        return null;
+
+    }
+
+
+    const meses = {
+
+        enero:0,
+        febrero:1,
+        marzo:2,
+        abril:3,
+        mayo:4,
+        junio:5,
+        julio:6,
+        agosto:7,
+        septiembre:8,
+        setiembre:8,
+        octubre:9,
+        noviembre:10,
+        diciembre:11
+
+    };
+
+
+    const mes =
+        meses[
+            partes[2].toLowerCase()
+        ];
+
+
+    if (mes === undefined) {
+        return null;
+    }
+
+
+    return new Date(
+        Number(partes[3]),
+        mes,
+        Number(partes[1])
+    );
+
+}
+
+
+/* =========================================================
+   HACER COMPROBANTE IMPRIMIBLE
+========================================================= */
+
+function prepararContenedorImpresion() {
+
+    /*
+     * Si ya existe, lo eliminamos para evitar
+     * duplicados y páginas en blanco.
+     */
+
+    const anterior =
+        document.getElementById(
+            "receiptPrintWrapper"
+        );
+
+    if (anterior) {
+        anterior.remove();
+    }
+
+
+    const wrapper =
+        document.createElement("div");
+
+
+    wrapper.id =
+        "receiptPrintWrapper";
+
+
+    /*
+     * Movemos temporalmente el comprobante.
+     * No clonamos el contenido, por lo tanto:
+     * - no desaparece la firma
+     * - no se pierden los datos
+     * - no se altera el diseño
+     */
+
+    const receipt =
+        document.getElementById(
+            "receiptPDF"
+        );
+
+
+    wrapper.appendChild(receipt);
+
+    document.body.appendChild(wrapper);
+
+
+    return wrapper;
+
+}
+
+
+/* =========================================================
+   IMPRIMIR A4
+========================================================= */
+
+window.imprimirComprobante = function() {
+
+    actualizarPreview();
+
+
+    prepararContenedorImpresion();
+
+
+    /*
+     * Esperamos a que el navegador aplique
+     * las reglas @media print.
+     */
+
+    setTimeout(() => {
+
+        window.print();
+
+    }, 150);
+
+};
+
+
+/* =========================================================
+   RESTAURAR DESPUÉS DE IMPRIMIR
+========================================================= */
+
+window.addEventListener(
+    "afterprint",
+    () => {
+
+        const wrapper =
+            document.getElementById(
+                "receiptPrintWrapper"
+            );
+
+
+        const receipt =
+            document.getElementById(
+                "receiptPDF"
+            );
+
+
+        if (
+            wrapper &&
+            receipt
+        ) {
+
+            /*
+             * Lo devolvemos exactamente
+             * a su lugar original.
+             */
+
+            const seccion =
+                document.querySelector(
+                    "#receiptPDF"
+                );
+
+
+            /*
+             * Como el receipt ya está dentro del wrapper,
+             * buscamos la sección original.
+             */
+
+            const seccionComprobante =
+                document.querySelector(
+                    "section.xl\\:col-span-7"
+                );
+
+
+            if (seccionComprobante) {
+
+                const caja =
+                    seccionComprobante.querySelector(
+                        ".bg-slate-200"
+                    );
+
+
+                if (caja) {
+                    caja.appendChild(receipt);
+                }
+
+            }
+
+
+            wrapper.remove();
+
+        }
+
+    }
+);
 
 </script>
 
 
 <!-- =========================================================
-     JAVASCRIPT PRINCIPAL
+     FUNCIONES NORMALES
 ========================================================= -->
 
 <script>
 
-    /* ========================================================
-       VARIABLES
-    ======================================================== */
+const meses = [
 
-    let estadoPagoActual = "pagado";
+    "Enero",
+    "Febrero",
+    "Marzo",
+    "Abril",
+    "Mayo",
+    "Junio",
+    "Julio",
+    "Agosto",
+    "Septiembre",
+    "Octubre",
+    "Noviembre",
+    "Diciembre"
 
-    let ultimoLinkPago = "";
-
-    let ultimoRegistroId = null;
-
-    window.pagosActuales = [];
-
-
-    /* ========================================================
-       UTILIDADES
-    ======================================================== */
-
-    function $(id) {
-
-        return document.getElementById(id);
-
-    }
+];
 
 
-    function escapeHTML(valor) {
+/* =========================================================
+   ESTADO GLOBAL
+========================================================= */
 
-        if (valor === null || valor === undefined) {
-            return "";
-        }
-
-        return String(valor)
-            .replaceAll("&", "&amp;")
-            .replaceAll("<", "&lt;")
-            .replaceAll(">", "&gt;")
-            .replaceAll('"', "&quot;")
-            .replaceAll("'", "&#039;");
-
-    }
+let estadoSeleccionado = "pagado";
 
 
-    function mostrarToast(
-        mensaje,
-        tipo = "info"
-    ) {
+document.addEventListener(
+    "DOMContentLoaded",
+    () => {
 
-        const container =
-            $("toastContainer");
-
-        const toast =
-            document.createElement("div");
-
-        toast.className =
-            `toast toast-${tipo}`;
-
-        toast.innerHTML =
-            `<i class="fa-solid ${
-                tipo === "success"
-                    ? "fa-circle-check"
-                    : tipo === "error"
-                    ? "fa-circle-xmark"
-                    : tipo === "warning"
-                    ? "fa-triangle-exclamation"
-                    : "fa-circle-info"
-            } mr-2"></i>${escapeHTML(mensaje)}`;
-
-        container.appendChild(toast);
-
-        setTimeout(() => {
-
-            toast.style.opacity = "0";
-
-            toast.style.transform =
-                "translateY(10px)";
-
-            setTimeout(() => {
-
-                toast.remove();
-
-            }, 200);
-
-        }, 3500);
-
-    }
-
-
-    function dinero(valor) {
-
-        const numero =
-            Number(valor) || 0;
-
-        return numero.toLocaleString(
-            "es-PE",
-            {
-                style: "currency",
-                currency: "PEN"
-            }
-        );
-
-    }
-
-
-    function fechaBonita(valor) {
-
-        if (!valor) {
-            return "-";
-        }
-
-        /*
-            Si viene YYYY-MM-DD evitamos
-            problemas de zona horaria.
-        */
-
-        if (
-            typeof valor === "string" &&
-            /^\d{4}-\d{2}-\d{2}$/.test(valor)
-        ) {
-
-            const partes =
-                valor.split("-");
-
-            return `${partes[2]}/${partes[1]}/${partes[0]}`;
-
-        }
-
-        try {
-
-            const fecha =
-                new Date(valor);
-
-            if (isNaN(fecha.getTime())) {
-                return String(valor);
-            }
-
-            return fecha.toLocaleDateString(
-                "es-PE",
-                {
-                    day: "2-digit",
-                    month: "2-digit",
-                    year: "numeric"
-                }
-            );
-
-        } catch {
-
-            return String(valor);
-
-        }
-
-    }
-
-
-    function fechaISOParaMySQL(valor) {
-
-        if (!valor) {
-            return "";
-        }
-
-        if (
-            typeof valor === "string" &&
-            /^\d{4}-\d{2}-\d{2}$/.test(valor)
-        ) {
-
-            return valor;
-
-        }
-
-        const fecha =
-            new Date(valor);
-
-        if (isNaN(fecha.getTime())) {
-            return "";
-        }
-
-        return fecha.toISOString()
-            .slice(0, 10);
-
-    }
-
-
-    function generarCodigo() {
-
-        const ahora =
+        const hoy =
             new Date();
 
-        const fecha =
-            ahora.getFullYear()
-            + String(
-                ahora.getMonth() + 1
-            ).padStart(2, "0")
-            + String(
-                ahora.getDate()
-            ).padStart(2, "0");
 
-        const aleatorio =
-            Math.floor(
-                1000 + Math.random() * 9000
-            );
+        document.getElementById(
+            "fechaInput"
+        ).value =
 
-        return `TRI-${fecha}-${aleatorio}`;
+            String(
+                hoy.getDate()
+            ).padStart(2,"0") +
+
+            " de " +
+
+            meses[
+                hoy.getMonth()
+            ] +
+
+            " de " +
+
+            hoy.getFullYear();
+
+
+        document.getElementById(
+            "periodoInput"
+        ).value =
+
+            meses[
+                hoy.getMonth()
+            ] +
+
+            " " +
+
+            hoy.getFullYear();
+
+
+        actualizarPreview();
 
     }
+);
 
 
-    /* ========================================================
-       ESTADO
-    ======================================================== */
+/* =========================================================
+   CAMBIAR TIPO
+========================================================= */
 
-    window.seleccionarEstado =
-        function (estado) {
+function cambiarTipoComprobante() {
 
-            estadoPagoActual =
-                estado;
-
-            $("btnPagado")
-                .classList.remove(
-                    "active-paid"
-                );
-
-            $("btnPendiente")
-                .classList.remove(
-                    "active-pending"
-                );
+    const tipo =
+        document.getElementById(
+            "tipoComprobante"
+        ).value;
 
 
-            if (estado === "pagado") {
+    const configuraciones = {
 
-                $("btnPagado")
-                    .classList.add(
-                        "active-paid"
-                    );
+        "SERVICIO DE LUZ": {
 
-            } else {
-
-                $("btnPendiente")
-                    .classList.add(
-                        "active-pending"
-                    );
-
-            }
-
-
-            actualizarVistaPrevia();
-
-        };
-
-
-    /* ========================================================
-       DATOS DEL FORMULARIO
-    ======================================================== */
-
-    function obtenerDatosFormulario() {
-
-        return {
-
-            tipoComprobante:
-                $("tipoComprobante")
-                    .value
-                    .trim(),
-
-            inquilino:
-                $("inquilino")
-                    .value
-                    .trim(),
-
-            dniInquilino:
-                $("dniInquilino")
-                    .value
-                    .trim(),
-
-            monto:
-                parseFloat(
-                    $("monto").value
-                ) || 0,
-
-            montoLetras:
-                $("montoLetras")
-                    .value
-                    .trim(),
+            titulo:
+                "CONSTANCIA DE PAGO — SERVICIO DE LUZ",
 
             concepto:
-                $("concepto")
-                    .value
-                    .trim(),
+                "Pago de Servicio de Energía Eléctrica (Luz)",
 
-            periodo:
-                $("periodo")
-                    .value
-                    .trim(),
+            texto:
+                "servicio de energía eléctrica (luz)",
 
-            fechaOperacion:
-                $("fechaOperacion")
-                    .value,
+            nota:
+                "Este documento acredita la recepción conforme del pago correspondiente al consumo de energía eléctrica del local comercial para el periodo indicado, sirviendo como comprobante administrativo para ambas partes.",
 
-            ubicacion:
-                $("ubicacion")
-                    .value
-                    .trim(),
+            footer:
+                "Centro Comercial Trivani — Comprobante Servicio de Luz"
 
-            banco:
-                $("banco")
-                    .value
-                    .trim(),
-
-            estadoPago:
-                estadoPagoActual
-
-        };
-
-    }
+        },
 
 
-    /* ========================================================
-       VALIDACIÓN
-    ======================================================== */
+        "ALQUILER DE LOCAL": {
 
-    function validarFormulario(
-        datos
-    ) {
+            titulo:
+                "CONSTANCIA DE PAGO DE ALQUILER",
 
-        if (!datos.inquilino) {
+            concepto:
+                "Alquiler de Local Comercial",
 
-            mostrarToast(
-                "Ingresa el nombre del inquilino.",
-                "warning"
-            );
+            texto:
+                "alquiler del local comercial",
 
-            $("inquilino").focus();
+            nota:
+                "Este documento acredita la recepción conforme del pago de la renta del local comercial correspondiente al periodo indicado, sirviendo como comprobante administrativo para ambas partes.",
 
-            return false;
+            footer:
+                "Centro Comercial Trivani — Comprobante de Pago de Alquiler"
 
-        }
+        },
 
 
-        if (!datos.dniInquilino) {
+        "SERVICIO DE AGUA": {
 
-            mostrarToast(
-                "Ingresa el DNI.",
-                "warning"
-            );
+            titulo:
+                "CONSTANCIA DE PAGO — SERVICIO DE AGUA",
 
-            $("dniInquilino").focus();
+            concepto:
+                "Pago de Servicio de Agua Potable",
 
-            return false;
+            texto:
+                "servicio de agua potable",
 
-        }
+            nota:
+                "Este documento acredita la recepción conforme del pago correspondiente al consumo de agua del local comercial para el periodo indicado, sirviendo como comprobante administrativo para ambas partes.",
+
+            footer:
+                "Centro Comercial Trivani — Comprobante Servicio de Agua"
+
+        },
 
 
-        if (datos.monto <= 0) {
+        "MANTENIMIENTO": {
 
-            mostrarToast(
-                "Ingresa un monto válido.",
-                "warning"
-            );
+            titulo:
+                "CONSTANCIA DE PAGO — MANTENIMIENTO",
 
-            $("monto").focus();
+            concepto:
+                "Mantenimiento General de Local Comercial",
 
-            return false;
+            texto:
+                "mantenimiento general",
+
+            nota:
+                "Este documento acredita la recepción conforme del pago por mantenimiento correspondiente al periodo indicado, sirviendo como comprobante administrativo para ambas partes.",
+
+            footer:
+                "Centro Comercial Trivani — Comprobante Mantenimiento"
 
         }
 
+    };
 
-        if (!datos.concepto) {
 
-            mostrarToast(
-                "Ingresa el concepto.",
-                "warning"
-            );
+    const c =
+        configuraciones[tipo];
 
-            $("concepto").focus();
 
-            return false;
+    document.getElementById(
+        "pvTituloHeader"
+    ).textContent =
+        c.titulo;
 
-        }
 
+    document.getElementById(
+        "conceptoInput"
+    ).value =
+        c.concepto;
 
-        if (!datos.periodo) {
 
-            mostrarToast(
-                "Ingresa el periodo.",
-                "warning"
-            );
+    document.getElementById(
+        "pvTextoConcepto"
+    ).textContent =
+        c.texto;
 
-            $("periodo").focus();
 
-            return false;
+    document.getElementById(
+        "pvNotaPie"
+    ).textContent =
+        "Nota: " + c.nota;
 
-        }
 
+    document.getElementById(
+        "pvFooterDoc"
+    ).textContent =
+        c.footer;
 
-        if (!datos.fechaOperacion) {
 
-            mostrarToast(
-                "Selecciona la fecha.",
-                "warning"
-            );
+    actualizarPreview();
 
-            $("fechaOperacion").focus();
+}
 
-            return false;
 
-        }
+/* =========================================================
+   PREVISUALIZACIÓN
+========================================================= */
 
+function actualizarPreview() {
 
-        return true;
+    const obtener =
+        id =>
+            document.getElementById(id).value;
 
-    }
 
+    const mostrar =
+        (id, valor) => {
 
-    /* ========================================================
-       ACTUALIZAR VISTA PREVIA
-    ======================================================== */
-
-    function actualizarVistaPrevia() {
-
-        const datos =
-            obtenerDatosFormulario();
-
-
-        $("previewComprobante")
-            .textContent =
-            datos.tipoComprobante ||
-            "RECIBO DE ALQUILER";
-
-
-        $("previewInquilino")
-            .textContent =
-            datos.inquilino || "-";
-
-
-        $("previewDni")
-            .textContent =
-            datos.dniInquilino || "-";
-
-
-        $("previewConcepto")
-            .textContent =
-            datos.concepto || "-";
-
-
-        $("previewPeriodo")
-            .textContent =
-            datos.periodo || "-";
-
-
-        $("previewFecha")
-            .textContent =
-            fechaBonita(
-                datos.fechaOperacion
-            );
-
-
-        $("previewUbicacion")
-            .textContent =
-            datos.ubicacion ||
-            "Centro Comercial Trivani";
-
-
-        $("previewBanco")
-            .textContent =
-            datos.banco || "-";
-
-
-        $("previewMonto")
-            .textContent =
-            dinero(datos.monto);
-
-
-        $("previewMontoLetras")
-            .textContent =
-            datos.montoLetras || "-";
-
-
-        const estado =
-            $("previewEstado");
-
-
-        if (
-            datos.estadoPago ===
-            "pagado"
-        ) {
-
-            estado.textContent =
-                "PAGADO";
-
-            estado.className =
-                "receipt-status paid";
-
-        } else {
-
-            estado.textContent =
-                "PENDIENTE";
-
-            estado.className =
-                "receipt-status pending";
-
-        }
-
-    }
-
-
-    /* ========================================================
-       GENERAR PDF A4 UNA SOLA PÁGINA
-    ======================================================== */
-
-    async function generarPDFBlob() {
-
-        const elemento =
-            $("receiptPDF");
-
-
-        /*
-            Clonamos el comprobante para
-            que la generación PDF no altere
-            la pantalla.
-        */
-
-        const clon =
-            elemento.cloneNode(true);
-
-
-        clon.style.transform =
-            "none";
-
-        clon.style.margin =
-            "0";
-
-        clon.style.width =
-            "210mm";
-
-        clon.style.height =
-            "297mm";
-
-        clon.style.minHeight =
-            "297mm";
-
-        clon.style.maxWidth =
-            "210mm";
-
-        clon.style.boxShadow =
-            "none";
-
-        clon.style.position =
-            "absolute";
-
-        clon.style.left =
-            "-100000px";
-
-        clon.style.top =
-            "0";
-
-        clon.style.overflow =
-            "hidden";
-
-
-        document.body.appendChild(clon);
-
-
-        try {
-
-            const canvas =
-                await html2canvas(
-                    clon,
-                    {
-                        scale: 2,
-                        useCORS: true,
-                        allowTaint: false,
-                        backgroundColor: "#ffffff",
-                        logging: false,
-                        width: clon.offsetWidth,
-                        height: clon.offsetHeight
-                    }
-                );
-
-
-            const {
-                jsPDF
-            } = window.jspdf;
-
-
-            const pdf =
-                new jsPDF(
-                    "p",
-                    "mm",
-                    "a4"
-                );
-
-
-            const pageWidth =
-                210;
-
-            const pageHeight =
-                297;
-
-            const margin =
-                0;
-
-
-            const usableWidth =
-                pageWidth - margin * 2;
-
-            const usableHeight =
-                pageHeight - margin * 2;
-
-
-            /*
-                Calculamos escala para que
-                TODO entre en una sola página.
-            */
-
-            const scale =
-                Math.min(
-                    usableWidth / canvas.width,
-                    usableHeight / canvas.height
-                );
-
-
-            const imgWidth =
-                canvas.width * scale;
-
-            const imgHeight =
-                canvas.height * scale;
-
-
-            const x =
-                (pageWidth - imgWidth) / 2;
-
-            const y =
-                (pageHeight - imgHeight) / 2;
-
-
-            const imagen =
-                canvas.toDataURL(
-                    "image/jpeg",
-                    0.94
-                );
-
-
-            pdf.addImage(
-                imagen,
-                "JPEG",
-                x,
-                y,
-                imgWidth,
-                imgHeight,
-                undefined,
-                "FAST"
-            );
-
-
-            return pdf.output(
-                "blob"
-            );
-
-        } finally {
-
-            clon.remove();
-
-        }
-
-    }
-
-
-    /* ========================================================
-       GUARDAR COMPROBANTE
-    ======================================================== */
-
-    window.guardarComprobante =
-        async function () {
-
-            const datos =
-                obtenerDatosFormulario();
-
-
-            if (
-                !validarFormulario(
-                    datos
-                )
-            ) {
-
-                return;
-
-            }
-
-
-            const codigo =
-                generarCodigo();
-
-
-            $("previewCodigo")
-                .textContent =
-                `Código: ${codigo}`;
-
-
-            actualizarVistaPrevia();
-
-
-            try {
-
-                mostrarToast(
-                    "Generando PDF...",
-                    "info"
-                );
-
-
-                const pdfBlob =
-                    await generarPDFBlob();
-
-
-                const nombreLimpio =
-                    datos.inquilino
-                        .replace(
-                            /[^a-zA-Z0-9áéíóúÁÉÍÓÚñÑ_-]/g,
-                            "_"
-                        )
-                        .substring(
-                            0,
-                            60
-                        );
-
-
-                const nombreArchivo =
-                    `${codigo}_${nombreLimpio}.pdf`;
-
-
-                /*
-                    1. Guardamos primero
-                    el registro en Firestore.
-                */
-
-                const {
-                    collection,
-                    addDoc,
-                    serverTimestamp,
-                    ref,
-                    uploadBytes,
-                    getDownloadURL,
-                    updateDoc,
-                    doc
-                } =
-                    window.firebaseFunctions;
-
-
-                const datosFirestore = {
-
-                    codigoComprobante:
-                        codigo,
-
-                    comprobanteCodigo:
-                        codigo,
-
-                    tipoComprobante:
-                        datos.tipoComprobante,
-
-                    inquilino:
-                        datos.inquilino,
-
-                    dniInquilino:
-                        datos.dniInquilino,
-
-                    monto:
-                        datos.monto,
-
-                    montoLetras:
-                        datos.montoLetras,
-
-                    concepto:
-                        datos.concepto,
-
-                    periodo:
-                        datos.periodo,
-
-                    fechaOperacion:
-                        datos.fechaOperacion,
-
-                    ubicacion:
-                        datos.ubicacion,
-
-                    banco:
-                        datos.banco,
-
-                    estadoPago:
-                        datos.estadoPago,
-
-                    pdfUrl:
-                        "",
-
-                    pdfNombre:
-                        nombreArchivo,
-
-                    linkPago:
-                        ultimoLinkPago || "",
-
-                    registroNube:
-                        serverTimestamp(),
-
-                    fechaConfirmacion:
-                        datos.estadoPago ===
-                        "pagado"
-                            ? serverTimestamp()
-                            : null
-
-                };
-
-
-                const registro =
-                    await addDoc(
-                        collection(
-                            window.firebaseDB,
-                            "pagos_trivani"
-                        ),
-                        datosFirestore
-                    );
-
-
-                ultimoRegistroId =
-                    registro.id;
-
-
-                /*
-                    2. Subimos PDF a Storage.
-                */
-
-                const ruta =
-                    `comprobantes/${registro.id}_${nombreArchivo}`;
-
-
-                const storageRef =
-                    ref(
-                        window.firebaseStorage,
-                        ruta
-                    );
-
-
-                await uploadBytes(
-                    storageRef,
-                    pdfBlob,
-                    {
-                        contentType:
-                            "application/pdf"
-                    }
-                );
-
-
-                const pdfUrl =
-                    await getDownloadURL(
-                        storageRef
-                    );
-
-
-                /*
-                    3. Guardamos URL
-                    en Firestore.
-                */
-
-                await updateDoc(
-                    doc(
-                        window.firebaseDB,
-                        "pagos_trivani",
-                        registro.id
-                    ),
-                    {
-                        pdfUrl:
-                            pdfUrl,
-
-                        pdfNombre:
-                            nombreArchivo
-                    }
-                );
-
-
-                /*
-                    4. Abrimos el PDF.
-                */
-
-                const url =
-                    URL.createObjectURL(
-                        pdfBlob
-                    );
-
-
-                window.open(
-                    url,
-                    "_blank"
-                );
-
-
-                mostrarToast(
-                    "Comprobante guardado correctamente.",
-                    "success"
-                );
-
-
-            } catch (error) {
-
-                console.error(
-                    error
-                );
-
-
-                mostrarToast(
-                    "No se pudo guardar el comprobante: " +
-                    error.message,
-                    "error"
-                );
-
-            }
+            document.getElementById(
+                id
+            ).textContent =
+                valor ?? "";
 
         };
 
 
-    /* ========================================================
-       ENLACE DE PAGO
-    ======================================================== */
+    mostrar(
+        "pvInqNombre",
+        obtener("inqNombre")
+    );
 
-    window.crearEnlacePago =
-        async function () {
 
-            const datos =
-                obtenerDatosFormulario();
+    mostrar(
+        "pvInqDni",
+        obtener("inqDni")
+    );
 
 
-            if (
-                !validarFormulario(
-                    datos
-                )
-            ) {
+    const monto =
+        parseFloat(
+            obtener("montoInput")
+        ) || 0;
 
-                return;
 
-            }
+    mostrar(
+        "pvMonto",
+        monto.toFixed(2)
+    );
 
 
-            /*
-                IMPORTANTE:
+    mostrar(
+        "pvMontoLetras",
+        obtener("montoLetrasInput")
+    );
 
-                GitHub Pages no puede ejecutar
-                tu Java directamente.
 
-                Tampoco debemos colocar aquí
-                el Access Token de Mercado Pago.
+    const periodo =
+        obtener("periodoInput");
 
-                Por ahora dejamos el botón
-                preparado y mostramos la razón.
-            */
 
-            mostrarToast(
-                "El enlace de Mercado Pago necesita un backend. GitHub Pages no puede crear la preferencia directamente.",
-                "warning"
-            );
+    mostrar(
+        "pvMesHeader",
+        periodo
+    );
 
 
-            /*
-                Cuando tengas el backend desplegado,
-                aquí se puede conectar:
+    mostrar(
+        "pvMesCuerpo",
+        periodo
+    );
 
-                const respuesta = await fetch(
-                    "https://TU-BACKEND/api/crear-preferencia",
-                    ...
-                );
 
-                Nunca pongas el Access Token
-                de Mercado Pago en este HTML.
-            */
+    mostrar(
+        "pvPeriodo",
+        periodo
+    );
 
-        };
 
+    const ubicacion =
+        obtener("ubicacionInput");
 
-    /* ========================================================
-       COPIAR ENLACE
-    ======================================================== */
 
-    window.copiarEnlace =
-        async function () {
+    mostrar(
+        "pvUbicacionCuerpo",
+        ubicacion
+    );
 
-            const input =
-                $("paymentLinkInput");
 
-            if (!input.value) {
+    mostrar(
+        "pvUbicacion",
+        ubicacion
+    );
 
-                return;
 
-            }
+    mostrar(
+        "pvConcepto",
+        obtener("conceptoInput")
+    );
 
-            try {
 
-                await navigator.clipboard.writeText(
-                    input.value
-                );
+    mostrar(
+        "pvBanco",
+        obtener("bancoInput")
+    );
 
-                mostrarToast(
-                    "Enlace copiado.",
-                    "success"
-                );
 
-            } catch {
+    mostrar(
+        "pvFecha",
+        obtener("fechaInput")
+    );
 
-                input.select();
 
-                document.execCommand(
-                    "copy"
-                );
+    mostrar(
+        "pvEstado",
+        estadoSeleccionado === "pagado"
+            ? "PAGADO"
+            : "PENDIENTE"
+    );
 
-                mostrarToast(
-                    "Enlace copiado.",
-                    "success"
-                );
 
-            }
+    document.getElementById(
+        "pvEstado"
+    ).className =
 
-        };
+        estadoSeleccionado === "pagado"
 
+            ? "w-2/3 text-emerald-600 font-black"
 
-    /* ========================================================
-       WHATSAPP
-    ======================================================== */
+            : "w-2/3 text-orange-600 font-black";
 
-    window.compartirWhatsApp =
-        function () {
+}
 
-            const link =
-                $("paymentLinkInput")
-                    .value;
 
-            if (!link) {
+/* =========================================================
+   ESTADO
+========================================================= */
 
-                return;
+function seleccionarEstado(estado) {
 
-            }
+    estadoSeleccionado =
+        estado;
 
 
-            const texto =
-                `Hola, puedes realizar tu pago mediante este enlace:\n${link}`;
-
-
-            window.open(
-                `https://wa.me/?text=${encodeURIComponent(texto)}`,
-                "_blank"
-            );
-
-        };
-
-
-    /* ========================================================
-       IMPRIMIR A4
-    ======================================================== */
-
-    window.imprimirA4 =
-        function () {
-
-            actualizarVistaPrevia();
-
-
-            /*
-                Damos tiempo al navegador
-                para actualizar el DOM.
-            */
-
-            setTimeout(() => {
-
-                window.print();
-
-            }, 150);
-
-        };
-
-
-    /* ========================================================
-       LIMPIAR
-    ======================================================== */
-
-    window.limpiarFormulario =
-        function () {
-
-            $("paymentForm")
-                .reset();
-
-
-            estadoPagoActual =
-                "pagado";
-
-
-            ultimoLinkPago =
-                "";
-
-
-            $("paymentLinkBox")
-                .classList.add(
-                    "hidden"
-                );
-
-
-            seleccionarEstado(
-                "pagado"
-            );
-
-
-            /*
-                Fecha actual
-            */
-
-            establecerFechaActual();
-
-
-            actualizarVistaPrevia();
-
-
-            mostrarToast(
-                "Formulario limpiado.",
-                "info"
-            );
-
-        };
-
-
-    /* ========================================================
-       ESTABLECER FECHA ACTUAL
-    ======================================================== */
-
-    function establecerFechaActual() {
-
-        const ahora =
-            new Date();
-
-
-        const yyyy =
-            ahora.getFullYear();
-
-
-        const mm =
-            String(
-                ahora.getMonth() + 1
-            ).padStart(
-                2,
-                "0"
-            );
-
-
-        const dd =
-            String(
-                ahora.getDate()
-            ).padStart(
-                2,
-                "0"
-            );
-
-
-        $("fechaOperacion")
-            .value =
-            `${yyyy}-${mm}-${dd}`;
-
-    }
-
-
-    /* ========================================================
-       HISTORIAL
-    ======================================================== */
-
-    window.renderizarHistorial =
-        function () {
-
-            const container =
-                $("historyContainer");
-
-
-            let registros =
-                Array.isArray(
-                    window.pagosActuales
-                )
-                    ? [
-                        ...window.pagosActuales
-                    ]
-                    : [];
-
-
-            const texto =
-                (
-                    $("searchHistory")
-                        .value || ""
-                )
-                .trim()
-                .toLowerCase();
-
-
-            const estadoFiltro =
-                $("filterStatus")
-                    .value;
-
-
-            const mesFiltro =
-                $("filterDate")
-                    .value;
-
-
-            /*
-                BUSCADOR
-            */
-
-            if (texto) {
-
-                registros =
-                    registros.filter(
-                        (item) => {
-
-                            const contenido =
-                                [
-                                    item.codigoComprobante,
-                                    item.comprobanteCodigo,
-                                    item.inquilino,
-                                    item.dniInquilino,
-                                    item.concepto,
-                                    item.periodo,
-                                    item.ubicacion
-                                ]
-                                .filter(Boolean)
-                                .join(" ")
-                                .toLowerCase();
-
-
-                            return contenido.includes(
-                                texto
-                            );
-
-                        }
-                    );
-
-            }
-
-
-            /*
-                ESTADO
-            */
-
-            if (
-                estadoFiltro !==
-                "todos"
-            ) {
-
-                registros =
-                    registros.filter(
-                        (item) => {
-
-                            return String(
-                                item.estadoPago ||
-                                ""
-                            ).toLowerCase() ===
-                            estadoFiltro;
-
-                        }
-                    );
-
-            }
-
-
-            /*
-                MES
-            */
-
-            if (mesFiltro) {
-
-                registros =
-                    registros.filter(
-                        (item) => {
-
-                            return String(
-                                item.fechaOperacion ||
-                                ""
-                            ).startsWith(
-                                mesFiltro
-                            );
-
-                        }
-                    );
-
-            }
-
-
-            if (
-                registros.length ===
-                0
-            ) {
-
-                container.innerHTML = `
-
-                    <div class="text-center py-12 text-slate-400">
-
-                        <div class="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center mx-auto mb-4">
-
-                            <i class="fa-solid fa-folder-open text-2xl"></i>
-
-                        </div>
-
-                        <div class="font-black text-slate-600">
-                            No hay registros
-                        </div>
-
-                        <div class="text-sm mt-1">
-                            Los comprobantes guardados aparecerán aquí.
-                        </div>
-
-                    </div>
-
-                `;
-
-                return;
-
-            }
-
-
-            container.innerHTML =
-                registros
-                    .map(
-                        crearTarjetaHistorial
-                    )
-                    .join("");
-
-        };
-
-
-    function crearTarjetaHistorial(
-        item
-    ) {
-
-        const estado =
-            String(
-                item.estadoPago ||
-                "pendiente"
-            ).toLowerCase();
-
-
-        const pagado =
-            estado ===
-            "pagado";
-
-
-        const codigo =
-            item.codigoComprobante ||
-            item.comprobanteCodigo ||
-            item.id ||
-            "-";
-
-
-        const monto =
-            dinero(
-                item.monto
-            );
-
-
-        const pdf =
-            item.pdfUrl ||
-            "";
-
-
-        const link =
-            item.linkPago ||
-            "";
-
-
-        return `
-
-            <article class="history-card mb-3">
-
-                <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-
-                    <div class="min-w-0 flex-1">
-
-                        <div class="flex flex-wrap items-center gap-2 mb-2">
-
-                            <span class="font-black text-slate-800">
-                                ${escapeHTML(
-                                    item.inquilino ||
-                                    "Sin nombre"
-                                )}
-                            </span>
-
-                            <span class="status-badge ${
-                                pagado
-                                    ? "badge-paid"
-                                    : "badge-pending"
-                            }">
-
-                                <i class="fa-solid ${
-                                    pagado
-                                        ? "fa-check"
-                                        : "fa-clock"
-                                }"></i>
-
-                                ${
-                                    pagado
-                                        ? "PAGADO"
-                                        : "PENDIENTE"
-                                }
-
-                            </span>
-
-                        </div>
-
-
-                        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs">
-
-                            <div>
-                                <div class="text-slate-400 font-bold">
-                                    Código
-                                </div>
-
-                                <div class="font-black text-slate-700">
-                                    ${escapeHTML(codigo)}
-                                </div>
-                            </div>
-
-
-                            <div>
-                                <div class="text-slate-400 font-bold">
-                                    DNI
-                                </div>
-
-                                <div class="font-black text-slate-700">
-                                    ${escapeHTML(
-                                        item.dniInquilino ||
-                                        "-"
-                                    )}
-                                </div>
-                            </div>
-
-
-                            <div>
-                                <div class="text-slate-400 font-bold">
-                                    Periodo
-                                </div>
-
-                                <div class="font-black text-slate-700">
-                                    ${escapeHTML(
-                                        item.periodo ||
-                                        "-"
-                                    )}
-                                </div>
-                            </div>
-
-
-                            <div>
-                                <div class="text-slate-400 font-bold">
-                                    Fecha
-                                </div>
-
-                                <div class="font-black text-slate-700">
-                                    ${escapeHTML(
-                                        fechaBonita(
-                                            item.fechaOperacion
-                                        )
-                                    )}
-                                </div>
-                            </div>
-
-                        </div>
-
-
-                        <div class="mt-3">
-
-                            <span class="text-xs text-slate-400 font-bold">
-                                Concepto:
-                            </span>
-
-                            <span class="text-xs text-slate-600 font-semibold">
-                                ${escapeHTML(
-                                    item.concepto ||
-                                    "-"
-                                )}
-                            </span>
-
-                        </div>
-
-                    </div>
-
-
-                    <div class="flex flex-col sm:flex-row lg:flex-col items-stretch lg:items-end gap-3">
-
-                        <div class="text-lg font-black text-blue-700 text-right">
-                            ${monto}
-                        </div>
-
-
-                        <div class="flex flex-wrap gap-2 justify-end">
-
-                            ${
-                                pdf
-                                    ? `
-                                        <button
-                                            class="history-action bg-blue-100 text-blue-700"
-                                            onclick="verPDF('${escapeHTML(pdf)}')"
-                                            title="Ver PDF"
-                                        >
-                                            <i class="fa-solid fa-eye"></i>
-                                            Ver
-                                        </button>
-
-                                        <button
-                                            class="history-action bg-slate-100 text-slate-700"
-                                            onclick="descargarPDF('${escapeHTML(pdf)}','${escapeHTML(codigo)}.pdf')"
-                                            title="Descargar PDF"
-                                        >
-                                            <i class="fa-solid fa-download"></i>
-                                            PDF
-                                        </button>
-
-                                        <button
-                                            class="history-action bg-green-100 text-green-700"
-                                            onclick="compartirPDF('${escapeHTML(pdf)}')"
-                                            title="Compartir"
-                                        >
-                                            <i class="fa-solid fa-share-nodes"></i>
-                                        </button>
-                                    `
-                                    : `
-                                        <span class="text-xs text-slate-400 self-center">
-                                            PDF no disponible
-                                        </span>
-                                    `
-                            }
-
-
-                            ${
-                                pagado
-                                    ? ""
-                                    : `
-                                        <button
-                                            class="history-action bg-green-100 text-green-700"
-                                            onclick="marcarPagado('${escapeHTML(item.id)}')"
-                                        >
-                                            <i class="fa-solid fa-check"></i>
-                                            Pagar
-                                        </button>
-                                    `
-                            }
-
-
-                            ${
-                                link
-                                    ? `
-                                        <button
-                                            class="history-action bg-purple-100 text-purple-700"
-                                            onclick="abrirEnlace('${escapeHTML(link)}')"
-                                        >
-                                            <i class="fa-solid fa-link"></i>
-                                            Enlace
-                                        </button>
-                                    `
-                                    : ""
-                            }
-
-
-                            <button
-                                class="history-action bg-red-100 text-red-700"
-                                onclick="eliminarRegistro('${escapeHTML(item.id)}')"
-                                title="Eliminar"
-                            >
-                                <i class="fa-solid fa-trash"></i>
-                            </button>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-            </article>
-
-        `;
-
-    }
-
-
-    /* ========================================================
-       VER PDF
-    ======================================================== */
-
-    window.verPDF =
-        function (url) {
-
-            if (!url) {
-
-                mostrarToast(
-                    "No existe PDF.",
-                    "warning"
-                );
-
-                return;
-
-            }
-
-            window.open(
-                url,
-                "_blank"
-            );
-
-        };
-
-
-    /* ========================================================
-       DESCARGAR PDF
-    ======================================================== */
-
-    window.descargarPDF =
-        async function (
-            url,
-            nombre
-        ) {
-
-            if (!url) {
-
-                return;
-
-            }
-
-
-            try {
-
-                const respuesta =
-                    await fetch(
-                        url
-                    );
-
-
-                const blob =
-                    await respuesta.blob();
-
-
-                const blobUrl =
-                    URL.createObjectURL(
-                        blob
-                    );
-
-
-                const enlace =
-                    document.createElement(
-                        "a"
-                    );
-
-
-                enlace.href =
-                    blobUrl;
-
-                enlace.download =
-                    nombre ||
-                    "comprobante.pdf";
-
-
-                document.body.appendChild(
-                    enlace
-                );
-
-
-                enlace.click();
-
-
-                enlace.remove();
-
-
-                setTimeout(
-                    () => {
-                        URL.revokeObjectURL(
-                            blobUrl
-                        );
-                    },
-                    1000
-                );
-
-
-            } catch (error) {
-
-                /*
-                    Si el navegador bloquea
-                    la descarga CORS, abrimos
-                    directamente el PDF.
-                */
-
-                window.open(
-                    url,
-                    "_blank"
-                );
-
-            }
-
-        };
-
-
-    /* ========================================================
-       COMPARTIR PDF
-    ======================================================== */
-
-    window.compartirPDF =
-        async function (
-            url
-        ) {
-
-            if (!url) {
-
-                return;
-
-            }
-
-
-            if (
-                navigator.share
-            ) {
-
-                try {
-
-                    await navigator.share(
-                        {
-                            title:
-                                "Comprobante C.C. Trivani",
-
-                            text:
-                                "Comprobante de pago C.C. Trivani",
-
-                            url:
-                                url
-                        }
-                    );
-
-                    return;
-
-                } catch {
-
-                    /*
-                        Usuario canceló.
-                    */
-
-                }
-
-            }
-
-
-            try {
-
-                await navigator.clipboard.writeText(
-                    url
-                );
-
-
-                mostrarToast(
-                    "Enlace del PDF copiado.",
-                    "success"
-                );
-
-            } catch {
-
-                window.open(
-                    url,
-                    "_blank"
-                );
-
-            }
-
-        };
-
-
-    /* ========================================================
-       MARCAR PAGADO
-    ======================================================== */
-
-    window.marcarPagado =
-        async function (
-            id
-        ) {
-
-            if (!id) {
-
-                return;
-
-            }
-
-
-            const confirmar =
-                confirm(
-                    "¿Confirmas marcar este pago como PAGADO?"
-                );
-
-
-            if (!confirmar) {
-
-                return;
-
-            }
-
-
-            try {
-
-                const {
-                    updateDoc,
-                    doc,
-                    serverTimestamp
-                } =
-                    window.firebaseFunctions;
-
-
-                await updateDoc(
-                    doc(
-                        window.firebaseDB,
-                        "pagos_trivani",
-                        id
-                    ),
-                    {
-                        estadoPago:
-                            "pagado",
-
-                        fechaConfirmacion:
-                            serverTimestamp()
-                    }
-                );
-
-
-                mostrarToast(
-                    "Pago marcado como PAGADO.",
-                    "success"
-                );
-
-
-            } catch (error) {
-
-                console.error(
-                    error
-                );
-
-
-                mostrarToast(
-                    "No se pudo actualizar el pago.",
-                    "error"
-                );
-
-            }
-
-        };
-
-
-    /* ========================================================
-       ABRIR ENLACE
-    ======================================================== */
-
-    window.abrirEnlace =
-        function (
-            url
-        ) {
-
-            if (!url) {
-
-                return;
-
-            }
-
-
-            window.open(
-                url,
-                "_blank"
-            );
-
-        };
-
-
-    /* ========================================================
-       ELIMINAR
-    ======================================================== */
-
-    window.eliminarRegistro =
-        async function (
-            id
-        ) {
-
-            if (!id) {
-
-                return;
-
-            }
-
-
-            const confirmar =
-                confirm(
-                    "¿Seguro que deseas eliminar este registro del historial?"
-                );
-
-
-            if (!confirmar) {
-
-                return;
-
-            }
-
-
-            try {
-
-                const {
-                    deleteDoc,
-                    doc
-                } =
-                    window.firebaseFunctions;
-
-
-                await deleteDoc(
-                    doc(
-                        window.firebaseDB,
-                        "pagos_trivani",
-                        id
-                    )
-                );
-
-
-                mostrarToast(
-                    "Registro eliminado.",
-                    "success"
-                );
-
-
-            } catch (error) {
-
-                console.error(
-                    error
-                );
-
-
-                mostrarToast(
-                    "No se pudo eliminar el registro.",
-                    "error"
-                );
-
-            }
-
-        };
-
-
-    /* ========================================================
-       RESUMEN
-    ======================================================== */
-
-    function actualizarResumen() {
-
-        const registros =
-            Array.isArray(
-                window.pagosActuales
-            )
-                ? window.pagosActuales
-                : [];
-
-
-        const total =
-            registros.length;
-
-
-        let pagado =
-            0;
-
-        let pendiente =
-            0;
-
-        let esteMes =
-            0;
-
-
-        const ahora =
-            new Date();
-
-
-        const mesActual =
-            ahora.getMonth();
-
-
-        const añoActual =
-            ahora.getFullYear();
-
-
-        registros.forEach(
-            (item) => {
-
-                const monto =
-                    Number(
-                        item.monto
-                    ) || 0;
-
-
-                const estado =
-                    String(
-                        item.estadoPago ||
-                        ""
-                    ).toLowerCase();
-
-
-                if (
-                    estado ===
-                    "pagado"
-                ) {
-
-                    pagado +=
-                        monto;
-
-                } else {
-
-                    pendiente +=
-                        monto;
-
-                }
-
-
-                if (
-                    item.fechaOperacion
-                ) {
-
-                    const partes =
-                        String(
-                            item.fechaOperacion
-                        ).split("-");
-
-
-                    if (
-                        partes.length === 3
-                    ) {
-
-                        const año =
-                            Number(
-                                partes[0]
-                            );
-
-                        const mes =
-                            Number(
-                                partes[1]
-                            ) - 1;
-
-
-                        if (
-                            año ===
-                            añoActual &&
-                            mes ===
-                            mesActual
-                        ) {
-
-                            esteMes +=
-                                monto;
-
-                        }
-
-                    }
-
-                }
-
-            }
+    const pagado =
+        document.getElementById(
+            "btnEstadoPagado"
         );
 
 
-        $("totalRegistros")
-            .textContent =
-            total;
+    const pendiente =
+        document.getElementById(
+            "btnEstadoPendiente"
+        );
 
 
-        $("totalPagado")
-            .textContent =
-            dinero(pagado);
+    pagado.className =
+        "p-3 rounded-xl border text-slate-500 text-xs font-bold";
 
 
-        $("totalPendiente")
-            .textContent =
-            dinero(pendiente);
+    pendiente.className =
+        "p-3 rounded-xl border text-slate-500 text-xs font-bold";
 
 
-        $("totalMes")
-            .textContent =
-            dinero(esteMes);
+    if (estado === "pagado") {
+
+        pagado.className =
+            "p-3 rounded-xl border-2 border-emerald-500 bg-emerald-50 text-emerald-700 text-xs font-bold";
+
+    } else {
+
+        pendiente.className =
+            "p-3 rounded-xl border-2 border-orange-500 bg-orange-50 text-orange-700 text-xs font-bold";
 
     }
 
 
-    /* ========================================================
-       ACTUALIZACIÓN EN TIEMPO REAL DEL FORMULARIO
-    ======================================================== */
+    actualizarPreview();
 
-    [
-        "tipoComprobante",
-        "inquilino",
-        "dniInquilino",
-        "monto",
-        "montoLetras",
-        "concepto",
-        "periodo",
-        "fechaOperacion",
-        "ubicacion",
-        "banco"
-    ]
-    .forEach(
-        (id) => {
-
-            const elemento =
-                $(id);
+}
 
 
-            if (!elemento) {
-                return;
-            }
+/* =========================================================
+   IMPRIMIR
+========================================================= */
 
+function imprimirComprobante() {
 
-            elemento.addEventListener(
-                "input",
-                actualizarVistaPrevia
-            );
+    actualizarPreview();
 
+    prepararContenedorImpresion();
 
-            elemento.addEventListener(
-                "change",
-                actualizarVistaPrevia
-            );
+    setTimeout(() => {
 
-        }
-    );
+        window.print();
 
+    },150);
 
-    /* ========================================================
-       ACTUALIZAR HISTORIAL MANUALMENTE
-    ======================================================== */
-
-    window.cargarHistorialManual =
-        function () {
-
-            actualizarResumen();
-
-            renderizarHistorial();
-
-            mostrarToast(
-                "Historial actualizado.",
-                "success"
-            );
-
-        };
-
-
-    /* ========================================================
-       INICIO
-    ======================================================== */
-
-    document.addEventListener(
-        "DOMContentLoaded",
-        () => {
-
-            establecerFechaActual();
-
-            seleccionarEstado(
-                "pagado"
-            );
-
-            actualizarVistaPrevia();
-
-        }
-    );
+}
 
 </script>
 

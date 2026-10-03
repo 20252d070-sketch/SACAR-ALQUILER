@@ -1,9 +1,31 @@
-# Backend Java - C.C. Trivani
+package com.trivani.backend;
 
-API Rest desarrollada en Java para la conexión con la base de datos MySQL de C.C. Trivani.
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 
-## Endpoints principales:
-- `POST /api/login` - Autenticación de Admin e Inquilinos.
-- `GET /api/inquilinos` - Obtener lista de inquilinos.
-- `POST /api/pagos` - Registrar un nuevo pago de alquiler.
-- `GET /api/pagos/inquilino/{id}` - Historial de pagos por inquilino.
+public class ConexionBD {
+
+    private static final String URL =
+            "jdbc:mysql://localhost:3306/trivani_db"
+            + "?useUnicode=true"
+            + "&characterEncoding=UTF-8"
+            + "&serverTimezone=America/Lima"
+            + "&useSSL=false"
+            + "&allowPublicKeyRetrieval=true";
+
+    private static final String USER = "root";
+    private static final String PASSWORD = "";
+
+    public static Connection obtenerConexion() throws SQLException {
+        try {
+            Class.forName("com.mysql.cj.jdbc.Driver");
+            return DriverManager.getConnection(URL, USER, PASSWORD);
+        } catch (ClassNotFoundException e) {
+            throw new SQLException(
+                    "Controlador JDBC de MySQL no encontrado.",
+                    e
+            );
+        }
+    }
+}

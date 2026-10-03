@@ -18,49 +18,12 @@ public class Pago {
     private String arrendadorNombre;
     private String arrendadorDni;
 
-    // Nuevos campos
     private String estadoPago;
     private String linkPago;
     private String preferenciaId;
     private String pdfUrl;
 
     public Pago() {
-    }
-
-    public Pago(
-            Integer id,
-            String comprobanteCodigo,
-            Integer inquilinoId,
-            BigDecimal monto,
-            String montoLetras,
-            String periodo,
-            LocalDate fechaOperacion,
-            String concepto,
-            String ubicacion,
-            String cuentaDestino,
-            String arrendadorNombre,
-            String arrendadorDni,
-            String estadoPago,
-            String linkPago,
-            String preferenciaId,
-            String pdfUrl
-    ) {
-        this.id = id;
-        this.comprobanteCodigo = comprobanteCodigo;
-        this.inquilinoId = inquilinoId;
-        this.monto = monto;
-        this.montoLetras = montoLetras;
-        this.periodo = periodo;
-        this.fechaOperacion = fechaOperacion;
-        this.concepto = concepto;
-        this.ubicacion = ubicacion;
-        this.cuentaDestino = cuentaDestino;
-        this.arrendadorNombre = arrendadorNombre;
-        this.arrendadorDni = arrendadorDni;
-        this.estadoPago = estadoPago;
-        this.linkPago = linkPago;
-        this.preferenciaId = preferenciaId;
-        this.pdfUrl = pdfUrl;
     }
 
     public Integer getId() {

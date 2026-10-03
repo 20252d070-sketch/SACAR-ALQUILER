@@ -50,7 +50,6 @@
                 flex-direction: column !important;
                 justify-content: space-between !important;
             }
-            /* Garantiza que la firma y pie de página no sufran cortes */
             .firma-section {
                 page-break-inside: avoid !important;
                 break-inside: avoid !important;
@@ -64,7 +63,6 @@
     <nav class="bg-slate-900 text-white shadow-lg border-b border-slate-800">
         <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
             <div class="flex items-center space-x-3">
-                <!-- GIF DE ROBOTÍN EN NAVBAR -->
                 <div class="relative">
                     <img src="https://i.pinimg.com/originals/4b/06/e3/4b06e393fd0647c265b1282b0f006486.gif" 
                          alt="Robotín Asistente" 
@@ -87,7 +85,7 @@
 
     <div class="max-w-7xl mx-auto px-4 py-8 space-y-8">
         
-        <!-- PANEL PRINCIPAL (EDITOR + VISTA PREVIA) -->
+        <!-- PANEL PRINCIPAL -->
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
             
             <!-- FORMULARIO DE EDICIÓN -->
@@ -97,7 +95,6 @@
                         <h2 class="font-bold text-lg text-slate-800">Editar Datos del Comprobante</h2>
                         <p class="text-xs text-slate-500">Modifica los campos para actualizar la vista previa</p>
                     </div>
-                    <!-- ROBOTÍN ASISTENTE EN FORMULARIO -->
                     <img src="https://i.pinimg.com/originals/4b/06/e3/4b06e393fd0647c265b1282b0f006486.gif" 
                          alt="Robotín Helper" 
                          class="w-12 h-12 rounded-lg border border-teal-200 shadow-sm">
@@ -275,7 +272,7 @@
 
         </div>
 
-        <!-- TABLA DE HISTORIAL DE PAGOS EN LA NUBE -->
+        <!-- TABLA DE HISTORIAL DE PAGOS EN LA NUBE CON BOTÓN DE ELIMINAR -->
         <div class="bg-white p-6 rounded-2xl shadow-md border border-slate-200">
             <div class="flex items-center justify-between border-b pb-4 mb-4">
                 <div>
@@ -297,11 +294,12 @@
                             <th class="p-3">Periodo</th>
                             <th class="p-3">Monto</th>
                             <th class="p-3 text-center">Registro</th>
+                            <th class="p-3 text-center">Acción</th>
                         </tr>
                     </thead>
                     <tbody id="tablaHistorial" class="divide-y divide-slate-200 font-medium">
                         <tr>
-                            <td colspan="6" class="p-4 text-center text-slate-400">Cargando pagos desde la nube...</td>
+                            <td colspan="7" class="p-4 text-center text-slate-400">Cargando pagos desde la nube...</td>
                         </tr>
                     </tbody>
                 </table>
@@ -313,7 +311,7 @@
     <!-- FIREBASE SDKS Y LÓGICA DE LA NUBE -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, deleteDoc, doc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "ATzaSyA3KMVMq-HcGhn1DuTk868J8cylorSjtiU",
@@ -336,12 +334,13 @@
             tabla.innerHTML = '';
 
             if (snapshot.empty) {
-                tabla.innerHTML = '<tr><td colspan="6" class="p-4 text-center text-slate-400">No hay pagos registrados aún en la nube.</td></tr>';
+                tabla.innerHTML = '<tr><td colspan="7" class="p-4 text-center text-slate-400">No hay pagos registrados aún en la nube.</td></tr>';
                 return;
             }
 
-            snapshot.forEach((doc) => {
-                const data = doc.data();
+            snapshot.forEach((documento) => {
+                const data = documento.data();
+                const docId = documento.id;
                 const fila = `
                     <tr class="hover:bg-slate-50 transition">
                         <td class="p-3 font-bold text-slate-800">${data.fechaOperacion || '-'}</td>
@@ -350,6 +349,11 @@
                         <td class="p-3">${data.periodo || '-'}</td>
                         <td class="p-3 font-bold text-teal-700">S/ ${parseFloat(data.monto || 0).toFixed(2)}</td>
                         <td class="p-3 text-center text-[10px] text-slate-400">${data.registroNube ? new Date(data.registroNube.toDate()).toLocaleString('es-PE') : 'Reciente'}</td>
+                        <td class="p-3 text-center">
+                            <button onclick="eliminarRegistro('${docId}')" class="text-red-500 hover:text-red-700 bg-red-50 hover:bg-red-100 p-1.5 rounded-lg transition" title="Eliminar registro">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
+                        </td>
                     </tr>
                 `;
                 tabla.innerHTML += fila;
@@ -358,9 +362,21 @@
             console.error("Error al leer Firestore:", error);
             const tabla = document.getElementById('tablaHistorial');
             if (tabla) {
-                tabla.innerHTML = '<tr><td colspan="6" class="p-4 text-center text-red-500 font-bold">Error de permisos en Firebase. Revisa las reglas en la consola.</td></tr>';
+                tabla.innerHTML = '<tr><td colspan="7" class="p-4 text-center text-red-500 font-bold">Error de permisos en Firebase. Revisa las reglas en la consola.</td></tr>';
             }
         });
+
+        // FUNCION PARA ELIMINAR REGISTRO
+        window.eliminarRegistro = async function(id) {
+            if (confirm("¿Estás seguro de que deseas eliminar este registro del historial?")) {
+                try {
+                    await deleteDoc(doc(db, "pagos_trivani", id));
+                } catch (e) {
+                    console.error("Error al eliminar el documento: ", e);
+                    alert("No se pudo eliminar el registro. Inténtalo nuevamente.");
+                }
+            }
+        };
 
         // GUARDAR EN LA NUBE E IMPRIMIR
         window.guardarEImprimir = async function() {
@@ -388,7 +404,6 @@
 
     <!-- LÓGICA DE INTERFAZ, VISTA PREVIA Y FECHA AUTOMÁTICA -->
     <script>
-        // CARGAR FECHA ACTUAL AUTOMÁTICAMENTE AL ABRIR LA PÁGINA
         document.addEventListener('DOMContentLoaded', function() {
             const hoy = new Date();
             const meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];

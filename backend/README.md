@@ -1,18 +1,22 @@
-USE trivani_db;
+# C.C. Trivani - Sistema de Gestión de Alquileres
 
-ALTER TABLE pagos
-ADD COLUMN estado_pago VARCHAR(30)
-    NOT NULL DEFAULT 'PENDIENTE';
+Sistema backend para la gestión de pagos, inquilinos y comprobantes del Centro Comercial Trivani.
 
-ALTER TABLE pagos
-ADD COLUMN link_pago TEXT NULL;
+## Tecnologías
 
-ALTER TABLE pagos
-ADD COLUMN preferencia_id VARCHAR(150) NULL;
+- Java
+- MySQL
+- JDBC
+- API REST
+- HTML / JavaScript
+- Firebase para almacenamiento de comprobantes
+- Mercado Pago para enlaces de pago
 
-ALTER TABLE pagos
-ADD COLUMN pdf_url TEXT NULL;
+---
 
-ALTER TABLE pagos
-ADD COLUMN fecha_registro TIMESTAMP
-    DEFAULT CURRENT_TIMESTAMP;
+# Base de datos
+
+La base de datos utilizada por el sistema se llama:
+
+```text
+trivani_db

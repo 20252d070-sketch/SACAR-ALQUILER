@@ -1,31 +1,18 @@
-package com.trivani.backend;
+USE trivani_db;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
+ALTER TABLE pagos
+ADD COLUMN estado_pago VARCHAR(30)
+    NOT NULL DEFAULT 'PENDIENTE';
 
-public class ConexionBD {
+ALTER TABLE pagos
+ADD COLUMN link_pago TEXT NULL;
 
-    private static final String URL =
-            "jdbc:mysql://localhost:3306/trivani_db"
-            + "?useUnicode=true"
-            + "&characterEncoding=UTF-8"
-            + "&serverTimezone=America/Lima"
-            + "&useSSL=false"
-            + "&allowPublicKeyRetrieval=true";
+ALTER TABLE pagos
+ADD COLUMN preferencia_id VARCHAR(150) NULL;
 
-    private static final String USER = "root";
-    private static final String PASSWORD = "";
+ALTER TABLE pagos
+ADD COLUMN pdf_url TEXT NULL;
 
-    public static Connection obtenerConexion() throws SQLException {
-        try {
-            Class.forName("com.mysql.cj.jdbc.Driver");
-            return DriverManager.getConnection(URL, USER, PASSWORD);
-        } catch (ClassNotFoundException e) {
-            throw new SQLException(
-                    "Controlador JDBC de MySQL no encontrado.",
-                    e
-            );
-        }
-    }
-}
+ALTER TABLE pagos
+ADD COLUMN fecha_registro TIMESTAMP
+    DEFAULT CURRENT_TIMESTAMP;
